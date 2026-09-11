@@ -16,14 +16,62 @@ const { t } = useI18n()
 
 let cleanupWs: (() => void) | undefined
 
+// ========== 面板拖拽调整 ==========
+const sidebarWidth = ref(parseInt(localStorage.getItem('harness_sidebar_width') || '240'))
+const chatWidth = ref(parseInt(localStorage.getItem('harness_chat_width') || '360'))
+const isDraggingLeft = ref(false)
+const isDraggingRight = ref(false)
+const minSidebarWidth = 180
+const maxSidebarWidth = 400
+const minChatWidth = 280
+const maxChatWidth = 600
+
+function startDragLeft(e: MouseEvent) {
+  e.preventDefault()
+  isDraggingLeft.value = true
+  document.body.style.cursor = 'col-resize'
+  document.body.style.userSelect = 'none'
+}
+
+function startDragRight(e: MouseEvent) {
+  e.preventDefault()
+  isDraggingRight.value = true
+  document.body.style.cursor = 'col-resize'
+  document.body.style.userSelect = 'none'
+}
+
+function onMouseMove(e: MouseEvent) {
+  if (isDraggingLeft.value) {
+    const newWidth = Math.max(minSidebarWidth, Math.min(maxSidebarWidth, e.clientX))
+    sidebarWidth.value = newWidth
+    localStorage.setItem('harness_sidebar_width', String(newWidth))
+  }
+  if (isDraggingRight.value) {
+    const newWidth = Math.max(minChatWidth, Math.min(maxChatWidth, window.innerWidth - e.clientX))
+    chatWidth.value = newWidth
+    localStorage.setItem('harness_chat_width', String(newWidth))
+  }
+}
+
+function stopDrag() {
+  isDraggingLeft.value = false
+  isDraggingRight.value = false
+  document.body.style.cursor = ''
+  document.body.style.userSelect = ''
+}
+
 // 启动全局 WebSocket 连接
 onMounted(() => {
   cleanupWs = wsStore.start()
+  document.addEventListener('mousemove', onMouseMove)
+  document.addEventListener('mouseup', stopDrag)
 })
 
 // 组件卸载时清理 WS 连接和监听器
 onUnmounted(() => {
   cleanupWs?.()
+  document.removeEventListener('mousemove', onMouseMove)
+  document.removeEventListener('mouseup', stopDrag)
 })
 
 // ========== 左侧栏双Tab ==========
@@ -103,8 +151,8 @@ const managementItems = [
 
 <template>
   <el-container class="layout">
-    <!-- 左侧栏 (240px, 白色, The Diva 风格) -->
-    <el-aside class="sidebar">
+    <!-- 左侧栏 (动态宽度, 最小180px, 最大400px) -->
+    <el-aside class="sidebar" :style="{ width: sidebarWidth + 'px' }">
       <!-- 品牌区 -->
       <div class="sidebar-header">
         <div class="sidebar-brand">
@@ -254,8 +302,11 @@ const managementItems = [
       </div>
     </el-aside>
 
-    <!-- 中间面板 (内容区) -->
-    <div class="center-panel">
+    <!-- 左侧拖拽分隔条 -->
+    <div class="divider divider-left" @mousedown="startDragLeft"></div>
+
+    <!-- 中间面板 (内容区, 弹性填充) -->
+    <div class="center-panel" style="flex: 1">
       <!-- 面包屑 (左对齐, The Diva 风格) -->
       <div class="breadcrumb">
         <span class="breadcrumb-item" @click="router.push('/dashboard')">ARKHAM</span>
@@ -271,8 +322,13 @@ const managementItems = [
       </div>
     </div>
 
-    <!-- 右侧 Chat Panel (360px, 会话框模式) -->
-    <ChatPanel />
+    <!-- 右侧拖拽分隔条 -->
+    <div class="divider divider-right" @mousedown="startDragRight"></div>
+
+    <!-- 右侧 Chat Panel (动态宽度, 最小280px, 最大600px) -->
+    <div class="chat-wrapper" :style="{ width: chatWidth + 'px' }">
+      <ChatPanel />
+    </div>
   </el-container>
 </template>
 
@@ -283,15 +339,14 @@ const managementItems = [
   min-width: 860px;
 }
 
-/* ========== 左侧栏 (240px 默认, 弹性缩放) ========== */
+/* ========== 左侧栏 (动态宽度) ========== */
 .sidebar {
   background: var(--bg-sidebar, #FFFFFF);
   border-right: 1px solid var(--border-light, #E8E8E8);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  width: 240px;
-  flex-shrink: 1;
+  flex-shrink: 0;
   min-width: 180px;
 }
 
@@ -561,6 +616,48 @@ const managementItems = [
 .center-content::-webkit-scrollbar-thumb {
   background: transparent;
   border-radius: 3px;
+}
+
+/* ========== 拖拽分隔条 ========== */
+.divider {
+  width: 4px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  background: transparent;
+  transition: background 0.2s;
+  position: relative;
+  z-index: 10;
+}
+
+.divider:hover,
+.divider:active {
+  background: var(--arkham-primary, #E85A3D);
+}
+
+/* 拖拽时添加一条明显的线 */
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  background: var(--border-light, #E8E8E8);
+  transition: background 0.2s;
+}
+
+.divider:hover::after {
+  background: var(--arkham-primary, #E85A3D);
+}
+
+/* ========== 聊天面板包装器 ========== */
+.chat-wrapper {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 280px;
 }
 
 .sidebar-items:hover::-webkit-scrollbar-thumb,

@@ -317,8 +317,8 @@ function switchMode(m: ComposeMode) {
   display: flex;
   flex-direction: column;
   height: 100%;
-  width: 360px;
-  flex-shrink: 1;
+  width: 100%;
+  flex-shrink: 0;
   min-width: 280px;
   background: var(--bg-white, #FFFFFF);
 }
