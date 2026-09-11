@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/nicedoc/tauri/dev/.schema/config.schema.json",
   "productName": "HarnessTeamAI",
-  "version": "0.1.0",
+  "version": "0.1.13",
   "identifier": "com.harness.teamai",
   "build": {
     "beforeBuildCommand": "npm run build -- --mode tauri",
@@ -13,8 +13,8 @@
     "windows": [
       {
         "title": "Harness团队AI协作系统",
-        "width": 1200,
-        "height": 800,
+        "width": 1400,
+        "height": 900,
         "resizable": true,
         "fullscreen": false
       }

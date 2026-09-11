@@ -507,7 +507,7 @@ const managementItems = [
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 480px;
+  min-width: 600px;
   background: var(--bg-page, #FAFAFA);
 }
 
