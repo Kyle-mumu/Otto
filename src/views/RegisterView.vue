@@ -75,7 +75,7 @@ async function onSubmit() {
 <template>
   <div class="auth-page">
     <el-card class="auth-card" shadow="always">
-      <h1 class="auth-title">ARKHAM</h1>
+      <h1 class="auth-title">Otto</h1>
       <p class="auth-subtitle">{{ t('auth.createAccount') }}</p>
 
       <el-form ref="formRef" :model="form" :rules="rules" @submit.prevent="onSubmit" class="auth-form">

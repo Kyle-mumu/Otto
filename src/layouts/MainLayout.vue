@@ -156,7 +156,7 @@ const managementItems = [
       <!-- 品牌区 -->
       <div class="sidebar-header">
         <div class="sidebar-brand">
-          <span class="logo">ARKHAM</span>
+          <span class="logo">Otto</span>
           <span class="ws-indicator" :class="{ online: wsStore.connected }">
             {{ wsStore.connected ? '● ' + t('nav.online') : '○ ' + t('nav.offline') }}
           </span>
@@ -309,7 +309,7 @@ const managementItems = [
     <div class="center-panel" style="flex: 1">
       <!-- 面包屑 (左对齐, The Diva 风格) -->
       <div class="breadcrumb">
-        <span class="breadcrumb-item" @click="router.push('/dashboard')">ARKHAM</span>
+        <span class="breadcrumb-item" @click="router.push('/dashboard')">Otto</span>
         <span class="breadcrumb-sep">›</span>
         <span class="breadcrumb-item current">{{ currentBreadcrumb }}</span>
         <NetworkStatusBadge />

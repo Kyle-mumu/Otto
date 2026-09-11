@@ -482,7 +482,7 @@ async function refreshAll() {
 
 <style scoped>
 /* ========================================
-   NETWORK MANAGEMENT PAGE — ARKHAM DESIGN
+   NETWORK MANAGEMENT PAGE — Otto DESIGN
    ======================================== */
 
 .network-page {
