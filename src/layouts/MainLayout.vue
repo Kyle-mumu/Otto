@@ -103,8 +103,8 @@ const managementItems = [
 
 <template>
   <el-container class="layout">
-    <!-- 左侧栏 (280px, 白色, The Diva 风格) -->
-    <el-aside width="280px" class="sidebar">
+    <!-- 左侧栏 (240px, 白色, The Diva 风格) -->
+    <el-aside width="240px" class="sidebar">
       <!-- 品牌区 -->
       <div class="sidebar-header">
         <div class="sidebar-brand">
@@ -271,7 +271,7 @@ const managementItems = [
       </div>
     </div>
 
-    <!-- 右侧 Chat Panel (380px, 会话框模式) -->
+    <!-- 右侧 Chat Panel (360px, 会话框模式) -->
     <ChatPanel />
   </el-container>
 </template>
@@ -280,7 +280,7 @@ const managementItems = [
 .layout {
   height: 100vh;
   overflow: hidden;
-  min-width: 1024px;
+  min-width: 1320px;
 }
 
 /* ========== 左侧栏 (280px, 白色) ========== */
@@ -507,7 +507,7 @@ const managementItems = [
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 600px;
+  min-width: 720px;
   background: var(--bg-page, #FAFAFA);
 }
 
