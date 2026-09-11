@@ -236,18 +236,20 @@ onMounted(loadDashboard)
 }
 
 .item-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 12px;
+  align-items: start;
 }
 
 .list-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 12px;
+  padding: 12px;
   border-radius: 8px;
   background: var(--bg-page, #FAFAFA);
+  min-width: 0;
 }
 
 .item-main {
