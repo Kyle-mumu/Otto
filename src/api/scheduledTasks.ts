@@ -37,7 +37,7 @@ export interface ScheduledTaskCreateRequest {
 }
 
 export function getScheduledTasks(params?: { page?: number; page_size?: number; status?: string }) {
-  return http.get<PaginatedResponse<ScheduledTask>>('/scheduled-tasks', { params })
+  return http.get<ScheduledTask[]>('/scheduled-tasks', { params })
 }
 
 export function getScheduledTask(id: string) {

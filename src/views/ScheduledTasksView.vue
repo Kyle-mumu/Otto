@@ -41,7 +41,7 @@ async function fetchTasks() {
   loading.value = true
   try {
     const res = await getScheduledTasks()
-    tasks.value = res.data.items
+    tasks.value = res.data
   } catch {
     ElMessage.error('获取定时任务失败')
   } finally {

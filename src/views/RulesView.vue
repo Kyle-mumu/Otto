@@ -44,7 +44,7 @@ async function fetchRules() {
   loading.value = true
   try {
     const res = await getRules()
-    rules.value = res.data.items
+    rules.value = res.data
   } catch {
     ElMessage.error('获取规则列表失败')
   } finally {
@@ -151,7 +151,7 @@ async function onViewExecutions(rule: Rule) {
   executionsLoading.value = true
   try {
     const res = await getRuleExecutions(rule.id)
-    executions.value = res.data.items
+    executions.value = res.data
   } catch {
     ElMessage.error('获取执行日志失败')
   } finally {

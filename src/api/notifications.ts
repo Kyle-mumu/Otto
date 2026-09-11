@@ -13,7 +13,7 @@ export interface TaskNotification {
 }
 
 export function getNotifications(params?: { page?: number; page_size?: number; unread_only?: boolean }) {
-  return http.get<PaginatedResponse<TaskNotification>>('/notifications', { params })
+  return http.get<TaskNotification[]>('/notifications', { params })
 }
 
 export function getUnreadCount() {

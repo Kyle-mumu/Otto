@@ -48,7 +48,7 @@ export interface RuleTemplate {
 }
 
 export function getRules(params?: { page?: number; page_size?: number; status?: string; event_type?: string }) {
-  return http.get<PaginatedResponse<Rule>>('/rules', { params })
+  return http.get<Rule[]>('/rules', { params })
 }
 
 export function getRule(id: string) {
@@ -80,7 +80,7 @@ export function testRule(id: string, event_data?: Record<string, any>) {
 }
 
 export function getRuleExecutions(id: string, params?: { page?: number; page_size?: number }) {
-  return http.get<PaginatedResponse<RuleExecution>>(`/rules/${id}/executions`, { params })
+  return http.get<RuleExecution[]>(`/rules/${id}/executions`, { params })
 }
 
 export function getRuleTemplates() {

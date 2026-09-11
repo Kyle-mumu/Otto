@@ -21,7 +21,7 @@ async function fetchNotifications() {
   loading.value = true
   try {
     const res = await getNotifications({ unread_only: filter.value === 'unread' })
-    notifications.value = res.data.items
+    notifications.value = res.data
   } catch {
     ElMessage.error('获取通知失败')
   } finally {
