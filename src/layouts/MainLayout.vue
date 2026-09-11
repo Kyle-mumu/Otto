@@ -156,7 +156,7 @@ const managementItems = [
       <!-- 品牌区 -->
       <div class="sidebar-header">
         <div class="sidebar-brand">
-          <span class="logo">Otto</span>
+          <img src="/otto-icon.png" alt="Otto" class="sidebar-logo" />
           <span class="ws-indicator" :class="{ online: wsStore.connected }">
             {{ wsStore.connected ? '● ' + t('nav.online') : '○ ' + t('nav.offline') }}
           </span>
@@ -306,7 +306,7 @@ const managementItems = [
     <div class="divider divider-left" @mousedown="startDragLeft"></div>
 
     <!-- 中间面板 (内容区, 弹性填充) -->
-    <div class="center-panel" style="flex: 1">
+    <div class="center-panel" style="flex: 1; padding: 24px;">
       <!-- 面包屑 (左对齐, The Diva 风格) -->
       <div class="breadcrumb">
         <span class="breadcrumb-item" @click="router.push('/dashboard')">Otto</span>
@@ -362,12 +362,11 @@ const managementItems = [
   margin-bottom: 8px;
 }
 
-.logo {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: var(--otto-primary, #E85A3D);
-  margin: 0;
+.sidebar-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  flex-shrink: 0;
 }
 
 .ws-indicator {

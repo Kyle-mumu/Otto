@@ -5,7 +5,7 @@
 <nav class="nav" role="navigation" aria-label="主导航">
   <div class="container">
     <router-link to="/" class="nav-logo" aria-label="Otto 首页">
-      <div class="nav-logo-icon" aria-hidden="true">A</div>
+      <img src="/otto-icon.png" alt="Otto" class="nav-logo-icon" aria-hidden="true" />
       <span>Otto</span>
     </router-link>
     <ul class="nav-links">
@@ -394,7 +394,7 @@
     <div class="footer-grid">
       <div class="footer-brand">
         <div class="footer-brand-name">
-          <div class="nav-logo-icon" style="width:24px;height:24px;font-size:12px;border-radius:4px" aria-hidden="true">A</div>
+          <img src="/otto-icon.png" alt="Otto" style="width:24px;height:24px;border-radius:4px" aria-hidden="true" />
           Otto
         </div>
         <p class="footer-brand-desc">小团队的 AI 办公操作系统。统一管控模型额度，数据不出本机，经验自动沉淀。</p>
@@ -513,7 +513,7 @@ onUnmounted(() => {
   --primary-200: #C7D2FE;
   --primary-300: #A5B4FC;
   --primary-400: #818CF8;
-  --primary-500: #6366F1;
+  --primary-500: #E85A3D;
   --primary-600: #4F46E5;
   --primary-700: #4338CA;
   --primary-800: #3730A3;
@@ -667,12 +667,12 @@ onUnmounted(() => {
 }
 
 .landing-page .btn:focus-visible {
-  outline: 2px solid #6366F1;
+  outline: 2px solid #E85A3D;
   outline-offset: 2px;
 }
 
 .landing-page .btn-primary {
-  background: #6366F1;
+  background: #E85A3D;
   color: #FFFFFF;
   padding: 14px 28px;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05), 0 0 0 1px rgba(99,102,241,0.2);
@@ -703,7 +703,7 @@ onUnmounted(() => {
 }
 
 .landing-page .btn-secondary:hover {
-  border-color: #6366F1;
+  border-color: #E85A3D;
   color: #4F46E5;
   background: #EEF2FF;
 }
@@ -757,7 +757,7 @@ onUnmounted(() => {
 .landing-page .nav-logo-icon {
   width: 32px;
   height: 32px;
-  background: #6366F1;
+  background: #E85A3D;
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -986,7 +986,7 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   height: 3px;
-  background: #6366F1;
+  background: #E85A3D;
   opacity: 0;
   transition: opacity 300ms ease;
 }
@@ -1068,7 +1068,7 @@ onUnmounted(() => {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #6366F1;
+  background: #E85A3D;
   color: #FFFFFF;
   font-size: 18px;
   font-weight: 700;
@@ -1323,7 +1323,7 @@ onUnmounted(() => {
   top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  background: #6366F1;
+  background: #E85A3D;
   color: #FFFFFF;
   font-size: 12px;
   font-weight: 600;
@@ -1449,7 +1449,7 @@ onUnmounted(() => {
 }
 
 .landing-page .faq-question:focus-visible {
-  outline: 2px solid #6366F1;
+  outline: 2px solid #E85A3D;
   outline-offset: -2px;
 }
 
