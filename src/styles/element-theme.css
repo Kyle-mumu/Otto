@@ -1,0 +1,77 @@
+/**
+ * Element Plus Arkham 主题覆盖
+ * 主色: #E85A3D (Arkham Warm Orange-Red)
+ * 参考: https://element-plus.org/zh-CN/guide/theming.html
+ * 来源: arkham.cc 配色提取
+ */
+:root {
+  /* 主色 Arkham 暖橙红 */
+  --el-color-primary: #E85A3D;
+  --el-color-primary-light-3: #F08068;
+  --el-color-primary-light-5: #F4A48A;
+  --el-color-primary-light-7: #F9CABC;
+  --el-color-primary-light-8: #FDE0D8;
+  --el-color-primary-light-9: #FEF2EE;
+  --el-color-primary-dark-2: #C4412A;
+
+  /* Arkham 品牌扩展色 */
+  --arkham-primary: #E85A3D;
+  --arkham-primary-light: #F4A48A;
+  --arkham-primary-dark: #C4412A;
+  --arkham-primary-50: #FEF2EE;
+  --arkham-primary-100: #FDE0D8;
+  --arkham-primary-200: #F9B9A7;
+
+  /* 背景色 */
+  --bg-page: #FAFAFA;
+  --bg-white: #FFFFFF;
+  --bg-sidebar: #FFFFFF;
+  --bg-sidebar-hover: #F5F3F1;
+  --bg-sidebar-active: #FEF2EE;
+
+  /* 文字色 */
+  --text-heading: #111111;
+  --text-body: #4A4A4A;
+  --text-muted: #888888;
+  --text-sidebar: #6B6B6B;
+
+  /* 成功色 Emerald */
+  --el-color-success: #10b981;
+  --el-color-success-light-3: #34d399;
+  --el-color-success-light-5: #6ee7b7;
+  --el-color-success-light-7: #a7f3d0;
+  --el-color-success-light-8: #d1fae5;
+  --el-color-success-light-9: #ecfdf5;
+  --el-color-success-dark-2: #059669;
+
+  /* 警告色 Amber */
+  --el-color-warning: #f59e0b;
+  --el-color-warning-light-3: #fbbf24;
+  --el-color-warning-light-5: #fcd34d;
+  --el-color-warning-light-7: #fde68a;
+  --el-color-warning-light-8: #fef3c7;
+  --el-color-warning-light-9: #fffbeb;
+  --el-color-warning-dark-2: #d97706;
+
+  /* 危险色 Rose */
+  --el-color-danger: #f43f5e;
+  --el-color-danger-light-3: #fb7185;
+  --el-color-danger-light-5: #fda4af;
+  --el-color-danger-light-7: #fecdd3;
+  --el-color-danger-light-8: #ffe4e6;
+  --el-color-danger-light-9: #fff1f2;
+  --el-color-danger-dark-2: #e11d48;
+
+  /* 字体 */
+  --el-font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, sans-serif;
+
+  /* 圆角 */
+  --el-border-radius-base: 6px;
+  --el-border-radius-small: 4px;
+  --el-border-radius-round: 20px;
+
+  /* 阴影 */
+  --el-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --el-box-shadow-light: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
