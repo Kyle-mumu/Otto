@@ -104,7 +104,7 @@ const managementItems = [
 <template>
   <el-container class="layout">
     <!-- 左侧栏 (240px, 白色, The Diva 风格) -->
-    <el-aside width="240px" class="sidebar">
+    <el-aside class="sidebar">
       <!-- 品牌区 -->
       <div class="sidebar-header">
         <div class="sidebar-brand">
@@ -280,16 +280,19 @@ const managementItems = [
 .layout {
   height: 100vh;
   overflow: hidden;
-  min-width: 1320px;
+  min-width: 860px;
 }
 
-/* ========== 左侧栏 (280px, 白色) ========== */
+/* ========== 左侧栏 (240px 默认, 弹性缩放) ========== */
 .sidebar {
   background: var(--bg-sidebar, #FFFFFF);
   border-right: 1px solid var(--border-light, #E8E8E8);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  width: 240px;
+  flex-shrink: 1;
+  min-width: 180px;
 }
 
 .sidebar-header {
@@ -507,7 +510,7 @@ const managementItems = [
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 720px;
+  min-width: 300px;
   background: var(--bg-page, #FAFAFA);
 }
 

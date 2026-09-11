@@ -228,7 +228,8 @@ function switchMode(m: ComposeMode) {
   flex-direction: column;
   height: 100%;
   width: 360px;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 280px;
   background: var(--bg-white, #FFFFFF);
 }
 
