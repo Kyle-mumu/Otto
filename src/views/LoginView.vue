@@ -13,6 +13,8 @@ const appVersion = ref(import.meta.env.VITE_APP_VERSION || '0.1.11')
 const apiBaseURL = ref(import.meta.env.VITE_API_BASE_URL || (__IS_TAURI__ ? 'http://localhost:8080/api/v1' : '/api/v1'))
 
 const formRef = ref<FormInstance>()
+const emailInputRef = ref()
+const passwordInputRef = ref()
 
 const form = reactive({
   email: '',
@@ -81,22 +83,26 @@ async function onSubmit() {
       <el-form ref="formRef" :model="form" :rules="rules" class="auth-form">
         <el-form-item :label="t('auth.email')">
           <el-input
+            ref="emailInputRef"
             v-model="form.email"
             type="email"
             :placeholder="t('auth.email')"
             size="large"
             :prefix-icon="Message"
+            @keydown.enter="passwordInputRef?.focus()"
           />
         </el-form-item>
 
         <el-form-item :label="t('auth.password')">
           <el-input
+            ref="passwordInputRef"
             v-model="form.password"
             type="password"
             :placeholder="t('auth.password')"
             size="large"
             show-password
             :prefix-icon="Lock"
+            @keydown.enter="onSubmit"
           />
         </el-form-item>
 
