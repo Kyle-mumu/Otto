@@ -1,6 +1,6 @@
 /**
  * Element Plus 全局配置
- * 主色: Arkham (#E85A3D)
+ * 主色: Otto (#E85A3D)
  * 配合 @element-plus/icons-vue 图标库
  */
 import ElementPlus from 'element-plus'

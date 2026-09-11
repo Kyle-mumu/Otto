@@ -226,7 +226,7 @@ onMounted(loadDashboard)
 }
 
 .link {
-  color: var(--arkham-primary, #E85A3D);
+  color: var(--otto-primary, #E85A3D);
   text-decoration: none;
   font-size: 13px;
 }

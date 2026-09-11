@@ -1,5 +1,5 @@
-const TOKEN_KEY = 'harness_access_token'
-const REFRESH_TOKEN_KEY = 'harness_refresh_token'
+const TOKEN_KEY = 'otto_access_token'
+const REFRESH_TOKEN_KEY = 'otto_refresh_token'
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY)

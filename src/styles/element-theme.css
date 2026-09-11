@@ -1,11 +1,11 @@
 /**
- * Element Plus Arkham 主题覆盖
- * 主色: #E85A3D (Arkham Warm Orange-Red)
+ * Element Plus Otto 主题覆盖
+ * 主色: #E85A3D (Otto Warm Orange-Red)
  * 参考: https://element-plus.org/zh-CN/guide/theming.html
- * 来源: arkham.cc 配色提取
+ * 来源: otto.ai 配色提取
  */
 :root {
-  /* 主色 Arkham 暖橙红 */
+  /* 主色 Otto 暖橙红 */
   --el-color-primary: #E85A3D;
   --el-color-primary-light-3: #F08068;
   --el-color-primary-light-5: #F4A48A;
@@ -14,13 +14,13 @@
   --el-color-primary-light-9: #FEF2EE;
   --el-color-primary-dark-2: #C4412A;
 
-  /* Arkham 品牌扩展色 */
-  --arkham-primary: #E85A3D;
-  --arkham-primary-light: #F4A48A;
-  --arkham-primary-dark: #C4412A;
-  --arkham-primary-50: #FEF2EE;
-  --arkham-primary-100: #FDE0D8;
-  --arkham-primary-200: #F9B9A7;
+  /* Otto 品牌扩展色 */
+  --otto-primary: #E85A3D;
+  --otto-primary-light: #F4A48A;
+  --otto-primary-dark: #C4412A;
+  --otto-primary-50: #FEF2EE;
+  --otto-primary-100: #FDE0D8;
+  --otto-primary-200: #F9B9A7;
 
   /* 背景色 */
   --bg-page: #FAFAFA;

@@ -192,7 +192,7 @@ function handleStatusAction() {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--arkham-primary, #E85A3D);
+  background: var(--otto-primary, #E85A3D);
   margin-top: 5px;
   flex-shrink: 0;
 }
@@ -221,7 +221,7 @@ function handleStatusAction() {
 
 .action-btn {
   padding: 10px 24px;
-  background: var(--arkham-primary, #E85A3D);
+  background: var(--otto-primary, #E85A3D);
   color: white;
   border: none;
   border-radius: 8px;

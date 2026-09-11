@@ -313,7 +313,7 @@ async function refreshAll() {
             </div>
             <div class="form-group">
               <label>标签</label>
-              <input type="text" v-model="authKeyForm.tags![0]" class="form-input" style="width: 100px;" placeholder="arkham-member">
+              <input type="text" v-model="authKeyForm.tags![0]" class="form-input" style="width: 100px;" placeholder="otto-member">
             </div>
             <button class="btn btn-primary" @click="openAuthKeyDialog" :disabled="authKeyLoading">
               ⚡ 生成新密钥
@@ -443,7 +443,7 @@ async function refreshAll() {
             </div>
             <div class="form-group">
               <label>标签（可选）</label>
-              <input type="text" v-model="authKeyForm.tags![0]" class="form-input" style="width: 100%;" placeholder="arkham-member">
+              <input type="text" v-model="authKeyForm.tags![0]" class="form-input" style="width: 100%;" placeholder="otto-member">
             </div>
           </div>
 
@@ -623,7 +623,7 @@ async function refreshAll() {
 
 .form-select:focus,
 .form-input:focus {
-  border-color: var(--arkham-primary);
+  border-color: var(--otto-primary);
 }
 
 .form-input {
@@ -653,13 +653,13 @@ async function refreshAll() {
 }
 
 .btn-primary {
-  background: var(--arkham-primary);
+  background: var(--otto-primary);
   color: white;
-  border-color: var(--arkham-primary);
+  border-color: var(--otto-primary);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--arkham-primary-dark);
+  background: var(--otto-primary-dark);
 }
 
 .btn-danger {
@@ -941,7 +941,7 @@ async function refreshAll() {
 
 .key-warning {
   font-size: 11px;
-  color: var(--arkham-primary);
+  color: var(--otto-primary);
   margin: 0;
 }
 

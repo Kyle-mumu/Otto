@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/nicedoc/tauri/dev/.schema/config.schema.json",
-  "productName": "HarnessTeamAI",
-  "version": "0.1.18",
-  "identifier": "com.harness.teamai",
+  "productName": "Otto",
+  "version": "0.1.19",
+  "identifier": "com.otto.ai",
   "build": {
     "beforeBuildCommand": "pnpm vite build",
     "beforeDevCommand": "",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Harness团队AI协作系统",
+        "title": "Otto AI协作系统",
         "width": 1600,
         "height": 900,
         "minWidth": 900,

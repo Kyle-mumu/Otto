@@ -15,9 +15,9 @@ const sessionDetail = computed(() => ({
   participants: ['kyle', 'employee'],
   messages: [
     { sender: 'kyle', content: '请帮我整理一份新人入职培训材料', time: '10:30' },
-    { sender: 'Arkham', content: '好的，我来帮你整理新人入职培训材料。包括以下几个部分：\n\n1. 公司文化介绍\n2. 系统使用指南\n3. 常见问题解答\n4. 联系方式汇总', time: '10:31' },
-    { sender: 'kyle', content: '能把系统使用指南部分展开一下吗？', time: '10:32' },
-    { sender: 'Arkham', content: '## 系统使用指南\n\n### 登录方式\n- 使用企业邮箱登录\n- 支持 SSO 单点登录\n\n### 核心功能\n- 知识库搜索\n- 任务管理\n- 团队协作', time: '10:33' },
+    { sender: 'Otto', content: '好的，我来帮你整理新人入职培训材料。包括以下几个部分：\n\n1. 公司文化介绍\n2. 系统使用指南\n3. 常见问题解答\n4. 联系方式汇总', time: '10:31' },
+    { sender: 'User', content: '太好了，请先整理系统使用指南部分', time: '10:32' },
+    { sender: 'Otto', content: '## 系统使用指南\n\n### 登录方式\n- 使用企业邮箱登录\n- 支持 SSO 单点登录\n\n### 核心功能\n- 知识库搜索\n- 任务管理\n- 团队协作', time: '10:33' },
   ],
 }))
 
@@ -135,7 +135,7 @@ function goBack() {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--arkham-primary, #E85A3D);
+  background: var(--otto-primary, #E85A3D);
   color: white;
   display: flex;
   align-items: center;
@@ -160,7 +160,7 @@ function goBack() {
 }
 
 .msg-row.user .msg-bubble {
-  background: var(--arkham-primary, #E85A3D);
+  background: var(--otto-primary, #E85A3D);
   color: white;
 }
 

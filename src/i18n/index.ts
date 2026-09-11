@@ -2,7 +2,7 @@ import { createI18n } from 'vue-i18n'
 import zhCN from './locales/zh-CN.json'
 import enUS from './locales/en-US.json'
 
-const savedLang = localStorage.getItem('harness_lang') || 'zh-CN'
+const savedLang = localStorage.getItem('otto_lang') || 'zh-CN'
 
 export const i18n = createI18n({
   legacy: false,
@@ -16,7 +16,7 @@ export const i18n = createI18n({
 
 export function setLocale(lang: 'zh-CN' | 'en-US') {
   i18n.global.locale.value = lang
-  localStorage.setItem('harness_lang', lang)
+  localStorage.setItem('otto_lang', lang)
   document.querySelector('html')?.setAttribute('lang', lang)
 }
 

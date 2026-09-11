@@ -50,11 +50,11 @@ function switchLanguage(lang: string) {
   border-radius: 6px;
   transition: background-color 0.2s;
   font-size: 13px;
-  color: var(--arkham-text-primary, #1f2937);
+  color: var(--otto-text-primary, #1f2937);
 }
 
 .lang-trigger:hover {
-  background-color: var(--arkham-bg-hover, #f3f4f6);
+  background-color: var(--otto-bg-hover, #f3f4f6);
 }
 
 .lang-icon {
@@ -78,6 +78,6 @@ function switchLanguage(lang: string) {
 
 .check-icon {
   margin-left: auto;
-  color: var(--arkham-primary, #E85A3D);
+  color: var(--otto-primary, #E85A3D);
 }
 </style>

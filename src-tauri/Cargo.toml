@@ -1,7 +1,7 @@
 [package]
-name = "harness-team-ai"
+name = "otto-ai"
 version = "0.1.0"
-description = "Harness团队AI协作系统 - 桌面端"
+description = "Otto AI协作系统 - 桌面端"
 authors = ["Kyle"]
 edition = "2021"
 build = "build.rs"

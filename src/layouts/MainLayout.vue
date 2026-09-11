@@ -17,8 +17,8 @@ const { t } = useI18n()
 let cleanupWs: (() => void) | undefined
 
 // ========== 面板拖拽调整 ==========
-const sidebarWidth = ref(parseInt(localStorage.getItem('harness_sidebar_width') || '240'))
-const chatWidth = ref(parseInt(localStorage.getItem('harness_chat_width') || '360'))
+const sidebarWidth = ref(parseInt(localStorage.getItem('otto_sidebar_width') || '240'))
+const chatWidth = ref(parseInt(localStorage.getItem('otto_chat_width') || '360'))
 const isDraggingLeft = ref(false)
 const isDraggingRight = ref(false)
 const minSidebarWidth = 180
@@ -44,12 +44,12 @@ function onMouseMove(e: MouseEvent) {
   if (isDraggingLeft.value) {
     const newWidth = Math.max(minSidebarWidth, Math.min(maxSidebarWidth, e.clientX))
     sidebarWidth.value = newWidth
-    localStorage.setItem('harness_sidebar_width', String(newWidth))
+    localStorage.setItem('otto_sidebar_width', String(newWidth))
   }
   if (isDraggingRight.value) {
     const newWidth = Math.max(minChatWidth, Math.min(maxChatWidth, window.innerWidth - e.clientX))
     chatWidth.value = newWidth
-    localStorage.setItem('harness_chat_width', String(newWidth))
+    localStorage.setItem('otto_chat_width', String(newWidth))
   }
 }
 
@@ -366,7 +366,7 @@ const managementItems = [
   font-size: 18px;
   font-weight: 700;
   letter-spacing: 1px;
-  color: var(--arkham-primary, #E85A3D);
+  color: var(--otto-primary, #E85A3D);
   margin: 0;
 }
 
@@ -410,7 +410,7 @@ const managementItems = [
 
 .icon-btn.active {
   background: var(--bg-sidebar-active, #FEF2EE);
-  color: var(--arkham-primary, #E85A3D);
+  color: var(--otto-primary, #E85A3D);
 }
 
 /* 双Tab切换 */
@@ -440,7 +440,7 @@ const managementItems = [
 
 .tab-btn.active {
   background: var(--bg-sidebar-active, #FEF2EE);
-  color: var(--arkham-primary, #E85A3D);
+  color: var(--otto-primary, #E85A3D);
   font-weight: 600;
 }
 
@@ -517,7 +517,7 @@ const managementItems = [
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--arkham-primary, #E85A3D);
+  background: var(--otto-primary, #E85A3D);
   color: white;
   font-size: 12px;
   font-weight: 600;
@@ -587,7 +587,7 @@ const managementItems = [
 }
 
 .breadcrumb-item:hover {
-  color: var(--arkham-primary, #E85A3D);
+  color: var(--otto-primary, #E85A3D);
 }
 
 .breadcrumb-item.current {
@@ -631,7 +631,7 @@ const managementItems = [
 
 .divider:hover,
 .divider:active {
-  background: var(--arkham-primary, #E85A3D);
+  background: var(--otto-primary, #E85A3D);
 }
 
 /* 拖拽时添加一条明显的线 */
@@ -648,7 +648,7 @@ const managementItems = [
 }
 
 .divider:hover::after {
-  background: var(--arkham-primary, #E85A3D);
+  background: var(--otto-primary, #E85A3D);
 }
 
 /* ========== 聊天面板包装器 ========== */

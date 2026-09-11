@@ -162,7 +162,7 @@ async function onSubmit() {
 .auth-title {
   font-size: 32px;
   font-weight: 700;
-  color: var(--arkham-primary, #E85A3D);
+  color: var(--otto-primary, #E85A3D);
   text-align: center;
   margin: 0 0 4px;
 }
@@ -197,7 +197,7 @@ async function onSubmit() {
 }
 
 .link {
-  color: var(--arkham-primary, #E85A3D);
+  color: var(--otto-primary, #E85A3D);
   text-decoration: none;
   font-weight: 500;
 }

@@ -4,9 +4,9 @@
 <!-- ===== Navigation ===== -->
 <nav class="nav" role="navigation" aria-label="主导航">
   <div class="container">
-    <router-link to="/" class="nav-logo" aria-label="Arkham 首页">
+    <router-link to="/" class="nav-logo" aria-label="Otto 首页">
       <div class="nav-logo-icon" aria-hidden="true">A</div>
-      <span>Arkham</span>
+      <span>Otto</span>
     </router-link>
     <ul class="nav-links">
       <li><a href="#pain">痛点</a></li>
@@ -35,7 +35,7 @@
       </div>
       <h1>你的团队还在每人各配一个 API Key？</h1>
       <p class="hero-subtitle">
-        Arkham 是小团队的 AI 办公操作系统 ——<br>
+        Otto 是小团队的 AI 办公操作系统 ——<br>
         统一管控模型额度，数据不出本机，经验自动沉淀。<br>
         5 人团队 5 分钟部署，免费开始。
       </p>
@@ -44,7 +44,7 @@
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           免费试用，5 分钟部署
         </router-link>
-        <a href="mailto:team@arkham.cc" class="btn btn-secondary btn-lg">
+        <a href="mailto:team@otto.ai" class="btn btn-secondary btn-lg">
           预约演示，了解详情
         </a>
       </div>
@@ -75,7 +75,7 @@
         痛点分析
       </div>
       <h2 class="section-title">小团队用 AI 的三个头疼问题</h2>
-      <p class="section-subtitle">你是否也遇到过这些困扰？Arkham 为每个问题提供了切实可行的解决方案。</p>
+      <p class="section-subtitle">你是否也遇到过这些困扰？Otto 为每个问题提供了切实可行的解决方案。</p>
     </div>
 
     <div class="pain-grid">
@@ -169,8 +169,8 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
         功能对比
       </div>
-      <h2 class="section-title">为什么选择 Arkham？</h2>
-      <p class="section-subtitle">核心功能全面对比，Arkham 在本地执行和经验沉淀上有独特优势。</p>
+      <h2 class="section-title">为什么选择 Otto？</h2>
+      <p class="section-subtitle">核心功能全面对比，Otto 在本地执行和经验沉淀上有独特优势。</p>
     </div>
 
     <div class="feature-table-wrapper" role="region" aria-label="功能对比表" tabindex="0">
@@ -178,7 +178,7 @@
         <thead>
           <tr>
             <th>功能</th>
-            <th>Arkham</th>
+            <th>Otto</th>
             <th>Dify</th>
             <th>Coze</th>
             <th>FastGPT</th>
@@ -241,13 +241,13 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         用户评价
       </div>
-      <h2 class="section-title">他们在用 Arkham</h2>
+      <h2 class="section-title">他们在用 Otto</h2>
       <p class="section-subtitle">来自真实团队的使用反馈。</p>
     </div>
 
     <div class="proof-grid">
       <div class="proof-card">
-        <p class="proof-quote">"我们 5 人外包团队，以前每人各买 GPT-4 Key，月底账单 ¥3000+。用了 Arkham 之后统一管控，同样的工作量降到 ¥1200。"</p>
+        <p class="proof-quote">"我们 5 人外包团队，以前每人各买 GPT-4 Key，月底账单 ¥3000+。用了 Otto 之后统一管控，同样的工作量降到 ¥1200。"</p>
         <div class="proof-author">
           <div class="proof-avatar" aria-hidden="true">李</div>
           <div class="proof-author-info">
@@ -326,7 +326,7 @@
           <li><span class="check" aria-hidden="true">✓</span> IM 集成</li>
           <li><span class="check" aria-hidden="true">✓</span> 完全私有部署</li>
         </ul>
-        <a href="mailto:team@arkham.cc" class="btn btn-secondary">联系我们</a>
+        <a href="mailto:team@otto.ai" class="btn btn-secondary">联系我们</a>
       </div>
     </div>
 
@@ -343,7 +343,7 @@
         常见问题
       </div>
       <h2 class="section-title">常见问题解答</h2>
-      <p class="section-subtitle">关于 Arkham 的常见疑问，如有更多问题欢迎联系我们。</p>
+      <p class="section-subtitle">关于 Otto 的常见疑问，如有更多问题欢迎联系我们。</p>
     </div>
 
     <div class="faq-list">
@@ -366,7 +366,7 @@
 <section class="section cta-section" id="cta">
   <div class="container">
     <h2 class="section-title">5 分钟部署，让团队 AI 协作效率翻倍</h2>
-    <p class="section-subtitle">加入正在使用 Arkham 的团队，开启本地 AI 协作新时代。</p>
+    <p class="section-subtitle">加入正在使用 Otto 的团队，开启本地 AI 协作新时代。</p>
     <router-link to="/register" class="btn btn-primary btn-lg">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       免费开始
@@ -395,7 +395,7 @@
       <div class="footer-brand">
         <div class="footer-brand-name">
           <div class="nav-logo-icon" style="width:24px;height:24px;font-size:12px;border-radius:4px" aria-hidden="true">A</div>
-          Arkham
+          Otto
         </div>
         <p class="footer-brand-desc">小团队的 AI 办公操作系统。统一管控模型额度，数据不出本机，经验自动沉淀。</p>
       </div>
@@ -428,7 +428,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 Arkham. All rights reserved.</span>
+      <span>© 2026 Otto. All rights reserved.</span>
       <span>用 ❤️ 为小团队打造</span>
     </div>
   </div>
@@ -446,7 +446,7 @@ const activeFaq = ref<number | null>(null)
 const faqItems = [
   {
     question: '我的数据安全吗？',
-    answer: 'Arkham 的 Agent 在你自己的电脑上执行，代码、文件、客户资料永远不会上传到云端。只有结构化的经验摘要（不含原始数据）会同步到团队知识库。V1.1 将支持端到端加密。'
+    answer: 'Otto 的 Agent 在你自己的电脑上执行，代码、文件、客户资料永远不会上传到云端。只有结构化的经验摘要（不含原始数据）会同步到团队知识库。V1.1 将支持端到端加密。'
   },
   {
     question: '我们团队不懂技术，能用吗？',

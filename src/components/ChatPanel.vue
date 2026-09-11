@@ -50,7 +50,7 @@ function loadHistorySession(session: HistorySession) {
       type: 'agent',
       content: `这是会话「${session.title}」的历史记录。V1.1 将支持完整的历史会话加载。`,
       time: '10:05',
-      sender: 'Arkham',
+      sender: 'Otto',
     },
   ]
   showHistory.value = false
@@ -64,7 +64,7 @@ function closePanels() {
 // ========== 表单数据 ==========
 const composeText = ref('')
 const selectedTeam = ref('default')
-const selectedModel = ref('Arkham v1 High')
+const selectedModel = ref('Otto v1 High')
 const selectedModeLevel = ref('standard')
 
 // ========== 上下文标签（仅任务模式显示） ==========
@@ -88,9 +88,9 @@ interface ChatMessage {
 const messages = ref<ChatMessage[]>([
   {
     type: 'agent',
-    content: '你好！我是 Arkham，你的 AI 助手。有什么我可以帮你的？无论是问答、讨论还是任务执行，我都可以协助你。',
+    content: '你好！我是 Otto，你的 AI 助手。有什么我可以帮你的？无论是问答、讨论还是任务执行，我都可以协助你。',
     time: '10:30',
-    sender: 'Arkham',
+    sender: 'Otto',
   },
 ])
 
@@ -117,7 +117,7 @@ function handleSend() {
       type: 'agent',
       content: '收到你的消息！这是演示回复，V1.1 将接入真实 LLM API。',
       time: timeStr,
-      sender: 'Arkham',
+      sender: 'Otto',
     })
   }, 1500)
   // TODO: V1.1 接入后端 LLM API + WebSocket
@@ -144,7 +144,7 @@ function switchMode(m: ComposeMode) {
       <div class="chat-header-left">
         <div class="chat-header-avatar">A</div>
         <div class="chat-header-info">
-          <h4>Arkham Agent</h4>
+          <h4>Otto Agent</h4>
           <div class="status"><span class="dot"></span> {{ mode === 'task' ? '任务模式' : '在线' }}</div>
         </div>
       </div>
@@ -286,8 +286,8 @@ function switchMode(m: ComposeMode) {
             <div class="model-chip" title="模型选择">
               <span class="model-dot"></span>
               <select v-model="selectedModel" class="model-select">
-                <option value="Arkham v1 High">Arkham v1 High</option>
-                <option value="Arkham v1 Standard">Arkham v1 Standard</option>
+                <option value="Otto v1 High">Otto v1 High</option>
+                <option value="Otto v1 Standard">Otto v1 Standard</option>
                 <option value="GPT-4o">GPT-4o</option>
                 <option value="Claude 3.5 Sonnet">Claude 3.5 Sonnet</option>
                 <option value="DeepSeek-V3">DeepSeek-V3</option>
@@ -343,7 +343,7 @@ function switchMode(m: ComposeMode) {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--arkham-primary, #E85A3D);
+  background: var(--otto-primary, #E85A3D);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -399,8 +399,8 @@ function switchMode(m: ComposeMode) {
 }
 
 .chat-header-btn.active {
-  background: var(--arkham-primary-50, #FEF2EE);
-  color: var(--arkham-primary, #E85A3D);
+  background: var(--otto-primary-50, #FEF2EE);
+  color: var(--otto-primary, #E85A3D);
 }
 
 /* History Panel */
@@ -569,15 +569,15 @@ function switchMode(m: ComposeMode) {
 
 .chat-mode-tab.active {
   background: var(--bg-white, #FFFFFF);
-  color: var(--arkham-primary, #E85A3D);
+  color: var(--otto-primary, #E85A3D);
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 /* Context Bar */
 .chat-context-bar {
   padding: 8px 12px;
-  background: var(--arkham-primary-50, #FEF2EE);
-  border-bottom: 1px solid var(--arkham-primary-100, #FDE0D8);
+  background: var(--otto-primary-50, #FEF2EE);
+  border-bottom: 1px solid var(--otto-primary-100, #FDE0D8);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -586,7 +586,7 @@ function switchMode(m: ComposeMode) {
 
 .chat-context-bar .context-label {
   font-size: 11px;
-  color: var(--arkham-primary, #E85A3D);
+  color: var(--otto-primary, #E85A3D);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -602,8 +602,8 @@ function switchMode(m: ComposeMode) {
   align-items: center;
   gap: 2px;
   background: var(--bg-white, #FFFFFF);
-  border: 1px solid var(--arkham-primary-100, #FDE0D8);
-  color: var(--arkham-primary, #E85A3D);
+  border: 1px solid var(--otto-primary-100, #FDE0D8);
+  color: var(--otto-primary, #E85A3D);
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 11px;
@@ -649,7 +649,7 @@ function switchMode(m: ComposeMode) {
 }
 
 .msg-row.user .msg-bubble {
-  background: var(--arkham-primary, #E85A3D);
+  background: var(--otto-primary, #E85A3D);
   color: white;
   border-bottom-right-radius: 4px;
 }
@@ -695,7 +695,7 @@ function switchMode(m: ComposeMode) {
 }
 
 .msg-row.agent .msg-avatar {
-  background: var(--arkham-primary, #E85A3D);
+  background: var(--otto-primary, #E85A3D);
   color: white;
 }
 
@@ -722,8 +722,8 @@ function switchMode(m: ComposeMode) {
 }
 
 .chat-input-box:focus-within {
-  border-color: var(--arkham-primary, #E85A3D);
-  box-shadow: 0 0 0 3px var(--arkham-primary-50, #FEF2EE);
+  border-color: var(--otto-primary, #E85A3D);
+  box-shadow: 0 0 0 3px var(--otto-primary-50, #FEF2EE);
 }
 
 .chat-textarea {
@@ -816,8 +816,8 @@ function switchMode(m: ComposeMode) {
 
 .chat-select-compact:focus {
   outline: none;
-  border-color: var(--arkham-primary, #E85A3D);
-  box-shadow: 0 0 0 2px var(--arkham-primary-50, #FEF2EE);
+  border-color: var(--otto-primary, #E85A3D);
+  box-shadow: 0 0 0 2px var(--otto-primary-50, #FEF2EE);
 }
 
 /* Model Selector Chip */
@@ -837,12 +837,12 @@ function switchMode(m: ComposeMode) {
 }
 
 .model-chip:hover {
-  border-color: var(--arkham-primary-200, #FBB8A8);
-  background: var(--arkham-primary-50, #FEF2EE);
+  border-color: var(--otto-primary-200, #FBB8A8);
+  background: var(--otto-primary-50, #FEF2EE);
 }
 
 .model-chip:hover .model-select {
-  color: var(--arkham-primary, #E85A3D);
+  color: var(--otto-primary, #E85A3D);
 }
 
 .model-chip .model-dot {
@@ -882,7 +882,7 @@ function switchMode(m: ComposeMode) {
   justify-content: center;
   border: none;
   border-radius: 50%;
-  background: var(--arkham-primary, #E85A3D);
+  background: var(--otto-primary, #E85A3D);
   color: white;
   font-size: 12px;
   cursor: pointer;
@@ -891,7 +891,7 @@ function switchMode(m: ComposeMode) {
 }
 
 .chat-send-btn:hover:not(:disabled) {
-  background: var(--arkham-primary-dark, #C4412A);
+  background: var(--otto-primary-dark, #C4412A);
   transform: scale(1.08);
   box-shadow: 0 2px 8px rgba(232, 90, 61, 0.3);
 }

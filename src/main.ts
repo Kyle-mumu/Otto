@@ -12,7 +12,7 @@ import './style.css'
 
 // 版本检查：每次构建自动生成新版本号，与 localStorage 对比
 const BUILD_VERSION = __BUILD_VERSION__
-const storedVersion = localStorage.getItem('harness_build_version')
+const storedVersion = localStorage.getItem('otto_build_version')
 if (storedVersion && storedVersion !== BUILD_VERSION) {
   // 版本变了，延迟显示 Toast（等 app 挂载后）
   setTimeout(() => {
@@ -25,7 +25,7 @@ if (storedVersion && storedVersion !== BUILD_VERSION) {
     })
   }, 1000)
 }
-localStorage.setItem('harness_build_version', BUILD_VERSION)
+localStorage.setItem('otto_build_version', BUILD_VERSION)
 
 const app = createApp(App)
 
