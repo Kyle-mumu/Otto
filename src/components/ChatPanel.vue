@@ -5,6 +5,62 @@ import { computed, ref } from 'vue'
 type ComposeMode = 'chat' | 'task'
 const mode = ref<ComposeMode>('chat')
 
+// ========== 历史面板 & 更多菜单 ==========
+const showHistory = ref(false)
+const showMoreMenu = ref(false)
+
+interface HistorySession {
+  id: string
+  title: string
+  time: string
+  preview: string
+}
+
+const historySessions = ref<HistorySession[]>([
+  { id: '1', title: '关于部署方案的讨论', time: '今天 10:30', preview: '我们讨论一下阿里云 ECS 的部署方案...' },
+  { id: '2', title: 'V1.2 功能规划', time: '昨天 16:20', preview: '规则引擎和定时任务的优先级需要确认...' },
+  { id: '3', title: '登录问题排查', time: '昨天 14:15', preview: 'Windows 端登录一直报网络错误...' },
+  { id: '4', title: 'UI 布局优化', time: '前天 09:45', preview: '仪表盘卡片排列需要调整...' },
+])
+
+function toggleHistory() {
+  showHistory.value = !showHistory.value
+  showMoreMenu.value = false
+}
+
+function toggleMoreMenu() {
+  showMoreMenu.value = !showMoreMenu.value
+  showHistory.value = false
+}
+
+function clearMessages() {
+  messages.value = []
+  showMoreMenu.value = false
+}
+
+function loadHistorySession(session: HistorySession) {
+  // 模拟加载历史会话
+  messages.value = [
+    {
+      type: 'user',
+      content: session.preview,
+      time: session.time.split(' ')[1] || '10:00',
+    },
+    {
+      type: 'agent',
+      content: `这是会话「${session.title}」的历史记录。V1.1 将支持完整的历史会话加载。`,
+      time: '10:05',
+      sender: 'Arkham',
+    },
+  ]
+  showHistory.value = false
+}
+
+function closePanels() {
+  showHistory.value = false
+  showMoreMenu.value = false
+}
+
 // ========== 表单数据 ==========
 const composeText = ref('')
 const selectedTeam = ref('default')
@@ -93,9 +149,42 @@ function switchMode(m: ComposeMode) {
         </div>
       </div>
       <div class="chat-header-actions">
-        <button class="chat-header-btn" title="历史">🕐</button>
-        <button class="chat-header-btn" title="更多">⋯</button>
+        <button class="chat-header-btn" :class="{ active: showHistory }" title="历史" @click="toggleHistory">🕐</button>
+        <button class="chat-header-btn" :class="{ active: showMoreMenu }" title="更多" @click="toggleMoreMenu">⋯</button>
       </div>
+    </div>
+
+    <!-- 历史面板 -->
+    <div v-if="showHistory" class="chat-history-panel">
+      <div class="history-header">
+        <h4>历史会话</h4>
+        <button class="history-close" @click="showHistory = false">✕</button>
+      </div>
+      <div class="history-list">
+        <div
+          v-for="session in historySessions"
+          :key="session.id"
+          class="history-item"
+          @click="loadHistorySession(session)"
+        >
+          <div class="history-item-title">{{ session.title }}</div>
+          <div class="history-item-preview">{{ session.preview }}</div>
+          <div class="history-item-time">{{ session.time }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 更多菜单 -->
+    <div v-if="showMoreMenu" class="chat-more-menu" @click.self="showMoreMenu = false">
+      <button class="more-menu-item" @click="clearMessages">
+        <span>🗑️</span> 清空对话
+      </button>
+      <button class="more-menu-item" disabled>
+        <span>📤</span> 导出聊天记录
+      </button>
+      <button class="more-menu-item" disabled>
+        <span>⚙️</span> 聊天设置
+      </button>
     </div>
 
     <!-- Mode Tabs -->
@@ -224,6 +313,7 @@ function switchMode(m: ComposeMode) {
    ======================================== */
 
 .chat-panel {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -306,6 +396,143 @@ function switchMode(m: ComposeMode) {
 .chat-header-btn:hover {
   background: var(--bg-sidebar-hover, #F5F3F1);
   color: var(--text-heading, #111);
+}
+
+.chat-header-btn.active {
+  background: var(--arkham-primary-50, #FEF2EE);
+  color: var(--arkham-primary, #E85A3D);
+}
+
+/* History Panel */
+.chat-history-panel {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-white, #FFFFFF);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--border-light, #E8E8E8);
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-light, #E8E8E8);
+}
+
+.history-header h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-heading, #111);
+}
+
+.history-close {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-muted, #888);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.history-close:hover {
+  background: var(--bg-sidebar-hover, #F5F3F1);
+  color: var(--text-heading, #111);
+}
+
+.history-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.history-item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 4px;
+}
+
+.history-item:hover {
+  background: var(--bg-sidebar-hover, #F5F3F1);
+}
+
+.history-item-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-heading, #111);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-item-preview {
+  font-size: 11px;
+  color: var(--text-muted, #888);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.history-item-time {
+  font-size: 10px;
+  color: var(--text-muted, #888);
+}
+
+/* More Menu Dropdown */
+.chat-more-menu {
+  position: absolute;
+  top: 50px;
+  right: 12px;
+  background: var(--bg-white, #FFFFFF);
+  border: 1px solid var(--border-light, #E8E8E8);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  z-index: 20;
+  padding: 4px;
+  min-width: 160px;
+}
+
+.more-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  color: var(--text-body, #4A4A4A);
+  cursor: pointer;
+  border-radius: 4px;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.more-menu-item:hover:not(:disabled) {
+  background: var(--bg-sidebar-hover, #F5F3F1);
+}
+
+.more-menu-item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.more-menu-item span {
+  font-size: 14px;
 }
 
 /* Mode Tabs */
