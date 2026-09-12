@@ -9,11 +9,22 @@ import router from '@/router'
 //                        Windows → http://121.43.110.135:8000/api/v1（直连 ECS）
 //   浏览器：/api/v1（走 Vite proxy 或同源）
 // 说明：必须用 127.0.0.1 而非 localhost —— WKWebView 会优先解析 IPv6 ::1 而连接失败。
-// 兜底分支_保留：若历史产物缺少该常量，仍按「Tauri → 本机隧道 / 浏览器 → 相对路径」回退。
+// 兜底分支_保留：若历史产物缺少该常量，只退回同源相对路径（不再硬编平台地址，见 H-09）。
+// H-09：兜底链已由批次 1 收敛 —— `__API_BASE_URL__` 与 `__IS_TAURI__` 均由
+// vite.config.ts 在构建期按平台固化（tauri: darwin → 127.0.0.1:8080 /
+// win32 → 121.43.110.135:8000；浏览器 → 相对 /api/v1），tauri.conf.json 的
+// beforeBuildCommand 亦已改为 `pnpm run build:tauri`（mode=tauri）。
+// 残余隐患：旧产物若缺该常量，原兜底会硬编 **darwin** 地址 —— 在 Windows Tauri
+// 下会把请求打到 127.0.0.1（本机）而非 ECS，属「静默指向错误后端」。
+// 现兜底不再硬编平台地址：一律退回同源相对路径，并显式告警（失败要可见）。
 const API_BASE_URL: string =
   typeof __API_BASE_URL__ === 'string' && __API_BASE_URL__
     ? __API_BASE_URL__
-    : (__IS_TAURI__ ? 'http://127.0.0.1:8080/api/v1' : '/api/v1')
+    : '/api/v1'
+
+if (typeof __API_BASE_URL__ !== 'string' || !__API_BASE_URL__) {
+  console.warn('[otto] __API_BASE_URL__ 未注入（疑似旧产物）：已退回同源 /api/v1')
+}
 
 const http: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,

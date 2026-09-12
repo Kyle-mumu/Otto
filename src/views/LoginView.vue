@@ -96,7 +96,11 @@ async function onSubmit() {
       error.value = err.message || t('auth.loginFailed')
       debugLog.value = `❌ 其他错误: ${err.message}`
     }
-    console.error('[LoginError]', err)
+    // H-07：禁止把整个 axios error 打进控制台 ——
+    // err.config.data 含明文邮箱+密码，err.config.headers 含 Bearer 令牌，
+    // 任何一次登录失败都会把凭据写进浏览器/WebView 控制台。
+    // 现只输出非敏感摘要（状态码 + 错误消息）。
+    console.error('[LoginError]', { status: err.response?.status, message: err.message })
   }
 }
 </script>

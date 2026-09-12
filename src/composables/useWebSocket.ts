@@ -19,12 +19,16 @@ export function useWebSocket(path: string = '/ws') {
   const reconnectDelay = 3000
   let authenticated = false
 
-  /** C-07: WS 基址由构建期注入（见 Build-5，按平台固化）；浏览器下回退按页面协议自动选择 ws/wss */
+  /**
+   * H-08（同源缺陷，本 composable 目前无调用方 —— 一并修正，避免日后被启用时复发）：
+   * 注入值为相对路径时不得原样返回；Tauri 兜底亦不再硬编 localhost:8000。
+   */
   function getWsBaseUrl(): string {
-    if (__WS_BASE_URL__) return __WS_BASE_URL__
-    if (window.__TAURI_INTERNALS__) return 'ws://localhost:8000/api/v1'
+    const injected = __WS_BASE_URL__
+    if (/^wss?:\/\//.test(injected)) return injected
     const proto = window.location.protocol === 'https:' ? 'wss' : 'ws'
-    return `${proto}://localhost:8000/api/v1`
+    const path = injected && injected.startsWith('/') ? injected : '/api/v1'
+    return `${proto}://${window.location.host}${path}`
   }
 
   function sendAuth(token: string) {

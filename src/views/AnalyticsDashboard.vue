@@ -122,6 +122,10 @@ import {
 } from 'echarts/components'
 import { Download } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+// H-10：`<script setup>` 作用域内没有全局注入的 `$t`（`globalInjection` 只对模板生效），
+// 原先直接使用 `$t(...)` 会在运行时抛 `ReferenceError: $t is not defined` → 页面白屏。
+// 现显式 import 并把解构出的 `t` 别名为 `$t`，与模板中的 `$t` 保持同一写法。
+import { useI18n } from 'vue-i18n'
 import MetricCard from '@/components/MetricCard.vue'
 import {
   getAnalyticsOverview,
@@ -130,6 +134,8 @@ import {
   getAnalyticsSearch,
   exportAnalytics,
 } from '@/api/analytics'
+
+const { t: $t } = useI18n()
 
 use([
   CanvasRenderer,

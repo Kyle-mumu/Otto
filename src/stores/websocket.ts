@@ -29,13 +29,24 @@ export const useWebSocketStore = defineStore('websocket', () => {
   let started = false
   let authenticated = false  // 认证状态标记
 
-  /** C-07: WS 基址由构建期注入（见 Build-5，按平台固化）；浏览器下回退按页面协议自动选择 ws/wss */
+  /**
+   * H-08：WS 基址解析（构建期注入 + 运行时兜底修正）
+   *
+   * 旧实现 `if (__WS_BASE_URL__) return __WS_BASE_URL__` 会把浏览器模式注入的
+   * **相对路径** `/api/v1` 原样返回，拼成 `new WebSocket("/api/v1/ws")`；
+   * Tauri 兜底还硬编了 `ws://localhost:8000`（IPv6 `::1` 解析与端口均不正确）。
+   *
+   * 现规则：
+   * - 注入值为绝对地址（桌面端：ws://127.0.0.1:8080/api/v1 等）→ 直接采用；
+   * - 注入值为相对路径或缺失（浏览器）→ 按「当前页面协议 + 当前 host」推导绝对地址，
+   *   与 HTTP 基址同源，浏览器下由 Vite proxy（`/api`，ws: true）转发。
+   */
   function getWsBaseUrl(): string {
-    if (__WS_BASE_URL__) return __WS_BASE_URL__
-    if (window.__TAURI_INTERNALS__) return 'ws://localhost:8000/api/v1'
-    // 自动检测：https 页面用 wss，http 页面用 ws
+    const injected = __WS_BASE_URL__
+    if (/^wss?:\/\//.test(injected)) return injected
     const proto = window.location.protocol === 'https:' ? 'wss' : 'ws'
-    return `${proto}://localhost:8000/api/v1`
+    const path = injected && injected.startsWith('/') ? injected : '/api/v1'
+    return `${proto}://${window.location.host}${path}`
   }
 
   /** C-05: 发送认证消息 */
