@@ -9,9 +9,11 @@ import {
   pauseScheduledTask,
   resumeScheduledTask,
   triggerScheduledTask,
+  getScheduledTaskInstances,
   deleteScheduledTask,
   nlParse,
   type ScheduledTask,
+  type ScheduledTaskInstance,
 } from '@/api/scheduledTasks'
 
 const tasks = ref<ScheduledTask[]>([])
@@ -20,6 +22,24 @@ const showCreateDialog = ref(false)
 const showNLDialog = ref(false)
 const nlText = ref('')
 const nlLoading = ref(false)
+
+// BUG-V13B2-011-b（D-4）：任务实例**只读**面板状态。
+// 口径（PM 核可附条件 (a)）：后端返回 = 「实例」轻量视图，**非 PRD §5 完整口径**。
+// 附条件 (c)：本面板不提供编辑 / 删除入口，避免与 tasks 模块写口重叠。
+const instances = ref<Record<string, ScheduledTaskInstance[]>>({})
+const instancesLoading = ref<Record<string, boolean>>({})
+const instancesExpanded = ref<Record<string, boolean>>({})
+
+// 实例状态标签（TaskStatus 值域，与定时任务 status 值域不同，单独映射）
+const instanceStatusLabels: Record<string, string> = {
+  draft: '草稿',
+  assigned: '已指派',
+  in_progress: '进行中',
+  delivered: '已交付',
+  reviewing: '检阅中',
+  completed: '已完成',
+  archived: '已归档',
+}
 
 // Form
 // BUG-V13B2-009「前端零填 · 四键一律剔除」：
@@ -115,13 +135,47 @@ async function onResume(task: ScheduledTask) {
   }
 }
 
+// BUG-V13B2-011-b：从 axios 错误中取出后端 detail，避免 `catch {}` 吞掉 409 的真实原因。
+// （类型安全：不引入 `any`，用窄化断言读 response.data.detail。）
+function apiErrorDetail(err: unknown, fallback: string): string {
+  const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail
+  return typeof detail === 'string' && detail ? detail : fallback
+}
+
+async function loadInstances(id: string) {
+  instancesLoading.value = { ...instancesLoading.value, [id]: true }
+  try {
+    const res = await getScheduledTaskInstances(id)
+    instances.value = { ...instances.value, [id]: res.data }
+  } catch {
+    ElMessage.error('获取实例列表失败')
+  } finally {
+    instancesLoading.value = { ...instancesLoading.value, [id]: false }
+  }
+}
+
+async function onToggleInstances(task: ScheduledTask) {
+  const next = !instancesExpanded.value[task.id]
+  instancesExpanded.value = { ...instancesExpanded.value, [task.id]: next }
+  if (next && !instances.value[task.id]) await loadInstances(task.id)
+}
+
+async function onRefreshInstances(task: ScheduledTask) {
+  await loadInstances(task.id)
+}
+
 async function onTrigger(task: ScheduledTask) {
   try {
-    await triggerScheduledTask(task.id)
-    ElMessage.success('已手动触发')
+    const res = await triggerScheduledTask(task.id)
+    if (res.data.triggered) {
+      ElMessage.success('已手动触发，已生成实例')
+    } else {
+      ElMessage.warning(res.data.detail || '未生成实例')
+    }
     await fetchTasks()
-  } catch {
-    ElMessage.error('触发失败')
+    if (instancesExpanded.value[task.id]) await loadInstances(task.id)
+  } catch (err: unknown) {
+    ElMessage.error(apiErrorDetail(err, '触发失败'))
   }
 }
 
@@ -256,8 +310,40 @@ onMounted(() => {
           <el-button v-if="task.status === 'active'" size="small" @click="onPause(task)" :icon="VideoPause">暂停</el-button>
           <el-button v-if="task.status === 'paused'" size="small" type="success" @click="onResume(task)" :icon="VideoPlay">恢复</el-button>
           <el-button size="small" @click="onTrigger(task)" :icon="Refresh">触发</el-button>
+          <el-button size="small" @click="onToggleInstances(task)">
+            {{ instancesExpanded[task.id] ? '收起实例' : '历史实例' }}
+          </el-button>
           <el-button size="small" @click="onEdit(task)">编辑</el-button>
           <el-button size="small" type="danger" @click="onDelete(task)">删除</el-button>
+        </div>
+
+        <!--
+          历史实例（只读 · 轻量视图）
+          BUG-V13B2-011-b（D-4）：数据源 = tasks.task_template_id。
+          口径 = 「实例」轻量视图，非 PRD §5 完整口径（归档 / 默认不展示 / 导出 / is_pinned
+          属 011-d 登记项、本批零动作）。本面板不提供编辑 / 删除入口。
+        -->
+        <div v-if="instancesExpanded[task.id]" v-loading="instancesLoading[task.id]" class="instance-panel">
+          <div class="instance-panel-header">
+            <span class="instance-panel-title">历史实例（只读 · 轻量视图）</span>
+            <el-button size="small" text :icon="Refresh" @click="onRefreshInstances(task)">刷新</el-button>
+          </div>
+          <el-table :data="instances[task.id] || []" size="small" border class="instance-table">
+            <el-table-column prop="title" label="标题" min-width="160" show-overflow-tooltip />
+            <el-table-column label="状态" width="100">
+              <template #default="{ row }">
+                <el-tag size="small">{{ instanceStatusLabels[row.status] || row.status }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="priority" label="优先级" width="90" />
+            <el-table-column label="截止时间" width="180">
+              <template #default="{ row }">{{ row.deadline ? new Date(row.deadline).toLocaleString() : '—' }}</template>
+            </el-table-column>
+            <el-table-column label="创建时间" width="180">
+              <template #default="{ row }">{{ new Date(row.created_at).toLocaleString() }}</template>
+            </el-table-column>
+          </el-table>
+          <div v-if="!(instances[task.id] || []).length" class="instance-empty">暂无实例</div>
         </div>
       </el-card>
     </div>
@@ -326,5 +412,29 @@ onMounted(() => {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
+}
+.instance-panel {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--el-border-color-light, #ebeef5);
+}
+.instance-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.instance-panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--el-text-color-regular, #606266);
+}
+.instance-table {
+  width: 100%;
+}
+.instance-empty {
+  font-size: 12px;
+  color: var(--el-color-info, #909399);
+  padding: 8px 0 0;
 }
 </style>

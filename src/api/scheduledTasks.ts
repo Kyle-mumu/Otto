@@ -1,5 +1,4 @@
 import http from './http'
-import type { PaginatedResponse } from '@/types/api'
 
 export interface ScheduledTask {
   id: string
@@ -36,7 +35,10 @@ export interface ScheduledTaskCreateRequest {
   deadline_offset_hours?: number
 }
 
-export function getScheduledTasks(params?: { page?: number; page_size?: number; status?: string }) {
+// BUG-V13B2-011-c：分页/筛选语汇对齐后端（实现侧为契约权威）。
+// 后端 POST/GET 列表签名 = status_filter / limit / offset（app/api/v1/scheduled_tasks.py:50-54），
+// 旧声明 { page, page_size, status } 与之不符 ⇒ 前端改、后端零动作、不加别名。
+export function getScheduledTasks(params?: { status_filter?: string; limit?: number; offset?: number }) {
   return http.get<ScheduledTask[]>('/scheduled-tasks', { params })
 }
 
@@ -66,12 +68,38 @@ export function resumeScheduledTask(id: string) {
   return http.post<ScheduledTask>(`/scheduled-tasks/${id}/resume`)
 }
 
-export function triggerScheduledTask(id: string) {
-  return http.post<ScheduledTask>(`/scheduled-tasks/${id}/trigger`)
+// BUG-V13B2-011-b（D-2）：后端补 POST /scheduled-tasks/{id}/trigger（此前后端不存在 ⇒ 必然 404）。
+// 路由复用 APScheduler 回调本体 execute_scheduled_task 的实例生成核心，返回新实例 id。
+export interface ScheduledTaskTriggerResult {
+  triggered: boolean
+  scheduled_task_id: string
+  task_instance_id?: string
+  next_triggered_at?: string
 }
 
-export function getScheduledTaskInstances(id: string, params?: { page?: number; page_size?: number }) {
-  return http.get<PaginatedResponse<any>>(`/scheduled-tasks/${id}/instances`, { params })
+export function triggerScheduledTask(id: string) {
+  return http.post<ScheduledTaskTriggerResult>(`/scheduled-tasks/${id}/trigger`)
+}
+
+// BUG-V13B2-011-b（D-4）：后端补 GET /scheduled-tasks/{id}/instances。
+// 口径（PM 核可附条件 (a)）：实例 = tasks.task_template_id 轻量视图，**非 PRD §5 完整口径**
+// —— 归档 / 默认不展示 / 导出 CSV·JSON / is_pinned 属 011-d 登记项、本批零动作。
+// 分页语汇与裁 3 统一：limit / offset（同 GET /scheduled-tasks）。
+// 返回项只读；前端不提供编辑 / 删除入口（附条件 (c)）。
+export interface ScheduledTaskInstance {
+  id: string
+  title: string
+  status: string
+  priority: string
+  assignee_id?: string
+  reviewer_id?: string
+  deadline?: string
+  completed_at?: string
+  created_at: string
+}
+
+export function getScheduledTaskInstances(id: string, params?: { limit?: number; offset?: number }) {
+  return http.get<ScheduledTaskInstance[]>(`/scheduled-tasks/${id}/instances`, { params })
 }
 
 /** NL parse — convert natural language to cron expression */
