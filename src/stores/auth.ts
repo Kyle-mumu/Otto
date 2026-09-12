@@ -15,15 +15,13 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(data: LoginRequest) {
     loading.value = true
     try {
-      console.log('[Auth] Login attempt:', data.email)
       const res = await apiLogin(data)
       setToken(res.data.access_token)
       setRefreshToken(res.data.refresh_token)
       await fetchUser()
-      console.log('[Auth] Login success, user:', user.value)
       router.push({ name: 'dashboard' })
     } catch (err: any) {
-      console.error('[Auth] Login failed:', err.response?.data || err.message)
+      logout()
       throw err
     } finally {
       loading.value = false
@@ -42,12 +40,8 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function fetchUser() {
-    try {
-      const res = await getCurrentUser()
-      user.value = res.data
-    } catch {
-      logout()
-    }
+    const res = await getCurrentUser()
+    user.value = res.data
   }
 
   function logout() {
@@ -60,7 +54,11 @@ export const useAuthStore = defineStore('auth', () => {
   // 初始化：有 token 就拉用户信息
   async function init() {
     if (getToken()) {
-      await fetchUser()
+      try {
+        await fetchUser()
+      } catch {
+        logout()
+      }
     }
   }
 

@@ -72,7 +72,7 @@ async function onSubmit() {
     if (err.response) {
       // 服务器返回了错误响应
       error.value = `[${err.response.status}] ${err.response.data?.detail || t('auth.loginFailed')}`
-      debugLog.value = `❌ 服务器返回错误: ${err.response.status}`
+      debugLog.value = `❌ 服务器返回错误: ${err.response.status} ${err.response.data?.detail || ''}`
     } else if (err.request) {
       // 请求发出但没有收到响应（网络错误 / CORS / 连接被拒）
       error.value = `网络错误：无法连接到 ${apiBaseURL.value}，请检查网络或安全组`
