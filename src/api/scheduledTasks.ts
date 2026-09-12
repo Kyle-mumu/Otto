@@ -49,7 +49,9 @@ export function createScheduledTask(data: ScheduledTaskCreateRequest) {
 }
 
 export function updateScheduledTask(id: string, data: Partial<ScheduledTaskCreateRequest>) {
-  return http.put<ScheduledTask>(`/scheduled-tasks/${id}`, data)
+  // BUG-V13B2-011-a：后端唯一更新路由为 PATCH（GET /{id} 路径遮蔽了 PUT），
+  // 两端择一改 —— 定稿为前端单点改，不新增后端路由。
+  return http.patch<ScheduledTask>(`/scheduled-tasks/${id}`, data)
 }
 
 export function deleteScheduledTask(id: string) {
@@ -74,5 +76,7 @@ export function getScheduledTaskInstances(id: string, params?: { page?: number; 
 
 /** NL parse — convert natural language to cron expression */
 export function nlParse(text: string) {
-  return http.post<{ cron_expr: string; cron_human: string; confidence: number }>('/scheduled-tasks/nl-parse', { text })
+  // BUG-V13B2-011-a（D-3）：后端挂载点为 POST /api/v1/nl-parse；
+  // 旧目标 '/scheduled-tasks/nl-parse' 被 GET /scheduled-tasks/{task_id} 路径遮蔽（405）。
+  return http.post<{ cron_expr: string; cron_human: string; confidence: number }>('/nl-parse', { text })
 }

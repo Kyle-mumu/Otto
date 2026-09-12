@@ -22,16 +22,16 @@ const nlText = ref('')
 const nlLoading = ref(false)
 
 // Form
+// BUG-V13B2-009「前端零填 · 四键一律剔除」：
+// assignee_id / reviewer_id / start_date / end_date 不在表单中承载、不进入提交体。
+// 缺省语义由后端 create_scheduled_task endpoint 层补足（Create 兜底 / Update 不兜底）；
+// 不硬编当前用户 id、不引入全局 transformRequest。
 const form = ref({
   title: '',
   description: '',
   priority: 'medium' as string,
   cron_expr: '',
   cron_human: '',
-  assignee_id: '',
-  reviewer_id: '',
-  start_date: '',
-  end_date: '',
   deadline_offset_hours: 24,
 })
 
@@ -77,10 +77,6 @@ function resetForm() {
     priority: 'medium',
     cron_expr: '',
     cron_human: '',
-    assignee_id: '',
-    reviewer_id: '',
-    start_date: '',
-    end_date: '',
     deadline_offset_hours: 24,
   }
   editingId.value = null
@@ -93,10 +89,6 @@ function onEdit(task: ScheduledTask) {
     priority: task.priority,
     cron_expr: task.cron_expr,
     cron_human: task.cron_human || '',
-    assignee_id: task.assignee_id || '',
-    reviewer_id: task.reviewer_id || '',
-    start_date: task.start_date || '',
-    end_date: task.end_date || '',
     deadline_offset_hours: task.deadline_offset_hours,
   }
   editingId.value = task.id
