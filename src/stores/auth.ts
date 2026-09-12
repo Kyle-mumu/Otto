@@ -19,7 +19,7 @@ export const useAuthStore = defineStore('auth', () => {
       setToken(res.data.access_token)
       setRefreshToken(res.data.refresh_token)
       await fetchUser()
-      router.push({ name: 'dashboard' })
+      await router.push({ name: 'dashboard' })
     } catch (err: any) {
       logout()
       throw err

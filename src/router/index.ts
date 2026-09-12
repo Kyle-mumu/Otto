@@ -128,4 +128,11 @@ router.beforeEach((to) => {
   }
 })
 
+// 导航错误处理（调试用）
+router.afterEach((to, from, failure) => {
+  if (failure) {
+    console.error('[Router导航失败]', from.path, '->', to.path, failure)
+  }
+})
+
 export default router

@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { Message, Lock } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
+
+const router = useRouter()
 
 const auth = useAuthStore()
 const { t } = useI18n()
@@ -66,7 +69,14 @@ async function onSubmit() {
   try {
     debugLog.value = `⏳ 正在连接 ${apiBaseURL.value}...`
     await auth.login({ email: form.email, password: form.password })
-    debugLog.value = '✅ 登录成功！'
+    debugLog.value = '✅ 登录成功！正在跳转...'
+    // 双重保险：auth.store 内部已 router.push，这里再确认一次
+    setTimeout(() => {
+      if (window.location.pathname === '/login' || window.location.hash === '#/login') {
+        debugLog.value = '⏳ 正在手动跳转 dashboard...'
+        router.push({ name: 'dashboard' })
+      }
+    }, 100)
   } catch (e: unknown) {
     const err = e as { response?: { data?: { detail?: string }, status?: number }, request?: unknown, message?: string }
     if (err.response) {
