@@ -4,7 +4,7 @@
   "version": "0.1.22",
   "identifier": "com.otto.ai",
   "build": {
-    "beforeBuildCommand": "pnpm vite build",
+    "beforeBuildCommand": "pnpm run build:tauri",
     "beforeDevCommand": "",
     "devUrl": "http://localhost:5173",
     "frontendDist": "../dist"
@@ -27,7 +27,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis", "dmg"],
+    "targets": "all",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

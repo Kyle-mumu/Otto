@@ -6,6 +6,9 @@ import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 export default defineConfig(({ mode }) => ({
+  // Tauri 生产环境通过自定义协议（macOS: tauri://localhost / Windows: http://tauri.localhost）加载前端，
+  // 绝对路径 /assets/... 会解析到协议根目录并 404 → 白屏。必须使用相对路径。
+  base: './',
   define: {
     __IS_TAURI__: mode === 'tauri',
     __BUILD_VERSION__: JSON.stringify(new Date().toISOString()),

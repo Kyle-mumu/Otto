@@ -4,9 +4,18 @@ import { ElMessage } from 'element-plus'
 import { getToken, setToken, removeToken, isTokenExpired, getRefreshToken, setRefreshToken, removeRefreshToken } from '@/utils/token'
 import router from '@/router'
 
-// Tauri 发布构建优先用环境变量 VITE_API_BASE_URL，否则 fallback 到 localhost:8080（SSH 隧道）
-// 浏览器开发/生产用 /api/v1（走 Vite proxy 或同源）
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (__IS_TAURI__ ? 'http://127.0.0.1:8080/api/v1' : '/api/v1')
+// API 基址解析（三档优先级）：
+//   1. 绝对地址（http/https 开头）→ 直接使用。来源：进程环境变量 > .env.tauri.local > .env.tauri
+//   2. Tauri 桌面端 + 相对/缺失地址 → 回退到本机隧道地址 http://127.0.0.1:8080/api/v1
+//      （必须用 127.0.0.1，不能用 localhost：WKWebView 会优先解析 IPv6 ::1 而连接失败）
+//   3. 浏览器（开发/生产）→ /api/v1（走 Vite proxy 或同源）
+// 说明：Vite 会把 .env 中的 `/api/v1` 原样注入 import.meta.env，相对路径在桌面端
+//       （tauri:// 自定义协议）下无 origin 可解析，因此这里显式判定绝对地址，避免回退逻辑被短路。
+const ENV_API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+const IS_ABSOLUTE_URL = /^https?:\/\//.test(ENV_API_BASE_URL || '')
+const API_BASE_URL = IS_ABSOLUTE_URL
+  ? ENV_API_BASE_URL
+  : (__IS_TAURI__ ? 'http://127.0.0.1:8080/api/v1' : '/api/v1')
 
 const http: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
