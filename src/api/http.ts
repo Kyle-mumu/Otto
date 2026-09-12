@@ -6,11 +6,11 @@ import router from '@/router'
 
 // Tauri 发布构建优先用环境变量 VITE_API_BASE_URL，否则 fallback 到 localhost:8080（SSH 隧道）
 // 浏览器开发/生产用 /api/v1（走 Vite proxy 或同源）
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (__IS_TAURI__ ? 'http://localhost:8080/api/v1' : '/api/v1')
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (__IS_TAURI__ ? 'http://127.0.0.1:8080/api/v1' : '/api/v1')
 
 const http: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000,
+  timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
   },

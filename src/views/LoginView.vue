@@ -10,7 +10,7 @@ const { t } = useI18n()
 
 // 版本号和 API 地址（用于调试）
 const appVersion = ref(import.meta.env.VITE_APP_VERSION || '0.1.11')
-const apiBaseURL = ref(import.meta.env.VITE_API_BASE_URL || (__IS_TAURI__ ? 'http://localhost:8080/api/v1' : '/api/v1'))
+const apiBaseURL = ref(import.meta.env.VITE_API_BASE_URL || (__IS_TAURI__ ? 'http://127.0.0.1:8080/api/v1' : '/api/v1'))
 
 const formRef = ref<FormInstance>()
 const emailInputRef = ref()
@@ -33,41 +33,54 @@ const rules = reactive<FormRules>({
 })
 
 const error = ref('')
+const debugLog = ref('')
 
 async function onSubmit() {
   error.value = ''
+  debugLog.value = '⏳ 点击登录按钮...'
 
   // 手动空值检查（Element Plus validate() 对未触碰字段会跳过）
   if (!form.email?.trim()) {
     error.value = t('auth.emailInvalid')
+    debugLog.value = '❌ 邮箱为空'
     return
   }
   if (!form.password) {
     error.value = t('auth.passwordError')
+    debugLog.value = '❌ 密码为空'
     return
   }
 
   if (!formRef.value) {
+    debugLog.value = '❌ formRef 未初始化'
     return
   }
   try {
+    debugLog.value = '⏳ 表单验证中...'
     await formRef.value.validate()
+    debugLog.value = '✅ 表单验证通过，正在发送请求...'
   } catch {
+    debugLog.value = '❌ 表单验证失败'
     return
   }
   try {
+    debugLog.value = `⏳ 正在连接 ${apiBaseURL.value}...`
     await auth.login({ email: form.email, password: form.password })
+    debugLog.value = '✅ 登录成功！'
   } catch (e: unknown) {
     const err = e as { response?: { data?: { detail?: string }, status?: number }, request?: unknown, message?: string }
     if (err.response) {
       // 服务器返回了错误响应
       error.value = `[${err.response.status}] ${err.response.data?.detail || t('auth.loginFailed')}`
+      debugLog.value = `❌ 服务器返回错误: ${err.response.status}`
     } else if (err.request) {
       // 请求发出但没有收到响应（网络错误 / CORS / 连接被拒）
       error.value = `网络错误：无法连接到 ${apiBaseURL.value}，请检查网络或安全组`
+      debugLog.value = `❌ 网络错误: ${err.message || '连接超时'}`
     } else {
       // 其他错误
       error.value = err.message || t('auth.loginFailed')
+      debugLog.value = `❌ 其他错误: ${err.message}`
     }
     console.error('[LoginError]', err)
   }
@@ -135,6 +148,11 @@ async function onSubmit() {
       <div class="debug-info">
         <span class="debug-version">v{{ appVersion }}</span>
         <span class="debug-url" :title="apiBaseURL">{{ apiBaseURL }}</span>
+      </div>
+
+      <!-- 登录状态调试 -->
+      <div v-if="debugLog" class="debug-log">
+        {{ debugLog }}
       </div>
     </el-card>
   </div>
@@ -229,5 +247,16 @@ async function onSubmit() {
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: help;
+}
+
+.debug-log {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+  color: #666;
+  word-break: break-all;
 }
 </style>
