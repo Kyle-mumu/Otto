@@ -29,10 +29,9 @@ export const useWebSocketStore = defineStore('websocket', () => {
   let started = false
   let authenticated = false  // 认证状态标记
 
-  /** C-07: 根据页面协议自动选择 ws/wss；Tauri 环境固定用 ws://localhost:8000 */
+  /** C-07: WS 基址由构建期注入（见 Build-5，按平台固化）；浏览器下回退按页面协议自动选择 ws/wss */
   function getWsBaseUrl(): string {
-    const envUrl = import.meta.env.VITE_WS_BASE_URL
-    if (envUrl) return envUrl
+    if (__WS_BASE_URL__) return __WS_BASE_URL__
     if (window.__TAURI_INTERNALS__) return 'ws://localhost:8000/api/v1'
     // 自动检测：https 页面用 wss，http 页面用 ws
     const proto = window.location.protocol === 'https:' ? 'wss' : 'ws'

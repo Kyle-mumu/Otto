@@ -13,7 +13,11 @@ const { t } = useI18n()
 
 // 版本号和 API 地址（用于调试）
 const appVersion = ref(import.meta.env.VITE_APP_VERSION || '0.1.11')
-const apiBaseURL = ref(import.meta.env.VITE_API_BASE_URL || (__IS_TAURI__ ? 'http://127.0.0.1:8080/api/v1' : '/api/v1'))
+const apiBaseURL = ref(__API_BASE_URL__)
+// 地址来源标记（platform-default:darwin:tauri 之类）属【内部构建信息】，
+// 仅供开发期排障；生产产物不向最终用户暴露（PM 裁决：非必要不加）。
+// 构建期来源仍由 vite.config.ts 的 [otto-build] 日志输出，QA 据此断言。
+const apiBaseSource = import.meta.env.DEV ? ref(__API_BASE_SOURCE__) : ref('')
 
 const formRef = ref<FormInstance>()
 const emailInputRef = ref()
@@ -154,10 +158,11 @@ async function onSubmit() {
         <RouterLink to="/register" class="link">{{ t('auth.register') }}</RouterLink>
       </p>
 
-      <!-- 调试信息：版本号 + API 地址 -->
+      <!-- 调试信息：版本号 + API 地址（Build-5 起地址在构建期固化，按平台自动选择） -->
+      <!-- 地址来源标记只在开发期（import.meta.env.DEV）随 title 显示，生产产物不暴露内部构建信息 -->
       <div class="debug-info">
         <span class="debug-version">v{{ appVersion }}</span>
-        <span class="debug-url" :title="apiBaseURL">{{ apiBaseURL }}</span>
+        <span class="debug-url" :title="apiBaseSource ? `${apiBaseURL}  ←  ${apiBaseSource}` : apiBaseURL">{{ apiBaseURL }}</span>
       </div>
 
       <!-- 登录状态调试 -->
