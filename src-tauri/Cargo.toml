@@ -1,6 +1,6 @@
 [package]
 name = "otto-ai"
-version = "0.1.23"
+version = "0.1.24"
 description = "Otto AI协作系统 - 桌面端"
 authors = ["Kyle"]
 edition = "2021"
