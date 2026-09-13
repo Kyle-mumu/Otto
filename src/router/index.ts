@@ -1,10 +1,8 @@
-import { createRouter, createWebHistory, createMemoryHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import { getToken } from '@/utils/token'
 
-const isTauri = !!window.__TAURI_INTERNALS__
-
 const router = createRouter({
-  history: isTauri ? createMemoryHistory() : createWebHistory(),
+  history: createWebHashHistory(),
   routes: [
     // Landing Page — 无需认证
     {

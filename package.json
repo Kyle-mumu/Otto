@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:tauri": "vite build --mode tauri",
+    "build:tauri": "node scripts/build-tauri.mjs",
     "preview": "vite preview",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
@@ -24,6 +24,7 @@
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
+    "@intlify/unplugin-vue-i18n": "^11.2.5",
     "@tauri-apps/cli": "^2.11.4",
     "@types/node": "^24.13.3",
     "@vitejs/plugin-vue": "^5.2.4",
