@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   createExperience,
@@ -11,6 +11,7 @@ import { useAuthStore } from '@/stores/auth'
 import type { Experience } from '@/types/api'
 import ExperienceTraceTab from '@/components/ExperienceTraceTab.vue'
 import OCRImportModal from '@/components/OCRImportModal.vue'
+import { ocrJobTracker } from '@/composables/ocrJobTracker'
 
 const store = useExperienceStore()
 const auth = useAuthStore()
@@ -22,6 +23,23 @@ const newSummary = ref('')
 
 // OCR 导入
 const showOCRImport = ref(false)
+
+// 进行中 OCR 任务（来自模块级 tracker，弹窗关闭后依然可见）
+const ocrTick = ref(0)
+let ocrTickTimer: ReturnType<typeof setInterval> | null = null
+const activeOcrJobs = computed(() => {
+  void ocrTick.value // 依赖 tick 触发重算
+  return ocrJobTracker.listActive()
+})
+
+/** stage 文案（与 OCRImportModal 保持同口径） */
+const OCR_STAGE_LABEL: Record<string, string> = {
+  queued: '排队中',
+  ocr: '正在识别文字...',
+  structuring: '正在结构化提取...',
+  embedding: '正在生成索引...',
+  done: '识别完成',
+}
 
 // 经验引用追溯抽屉
 const showTraceDrawer = ref(false)
@@ -112,9 +130,25 @@ function onOCRSuccess() {
   store.fetch()
 }
 
+/** 子组件提交作业后触发：起 tick 让提示条出现 */
+function onOCRJobSubmitted() {
+  ocrTick.value++
+}
+
 onMounted(() => {
   store.fetch()
   store.bindWsRefresh()
+  // 周期刷新「进行中任务」提示条（tracker 内部轮询是独立节奏）
+  ocrTickTimer = setInterval(() => {
+    ocrTick.value++
+  }, 2000)
+})
+
+onUnmounted(() => {
+  if (ocrTickTimer !== null) {
+    clearInterval(ocrTickTimer)
+    ocrTickTimer = null
+  }
 })
 </script>
 
@@ -131,6 +165,24 @@ onMounted(() => {
         </el-button>
       </div>
     </header>
+
+    <!-- 进行中 OCR 任务提示条（弹窗关闭后仍显示） -->
+    <el-alert
+      v-for="job in activeOcrJobs"
+      :key="job.job_id"
+      type="info"
+      :closable="false"
+      show-icon
+      class="ocr-active-bar"
+    >
+      <template #title>
+        <span class="ocr-active-text">
+          后台识别中：{{ job.filename }} ·
+          {{ OCR_STAGE_LABEL[job.stage] || '处理中...' }}
+        </span>
+        <el-button text size="small" @click="showOCRImport = true">查看</el-button>
+      </template>
+    </el-alert>
 
     <!-- 搜索栏 -->
     <el-input
@@ -249,7 +301,11 @@ onMounted(() => {
     </div>
 
     <!-- OCR 导入弹窗 -->
-    <OCRImportModal v-model="showOCRImport" @success="onOCRSuccess" />
+    <OCRImportModal
+      v-model="showOCRImport"
+      @success="onOCRSuccess"
+      @job-submitted="onOCRJobSubmitted"
+    />
   </div>
 </template>
 
@@ -308,5 +364,13 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   margin-top: 24px;
+}
+
+.ocr-active-bar {
+  margin-bottom: 16px;
+}
+
+.ocr-active-text {
+  margin-right: 8px;
 }
 </style>

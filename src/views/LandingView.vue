@@ -797,15 +797,16 @@ onUnmounted(() => {
   position: relative;
   padding: calc(64px + 64px) 0 64px;
   background: linear-gradient(135deg, #F5F3FF 0%, #EEF2FF 40%, #E0E7FF 100%);
-  overflow: hidden;
+  overflow: clip;
+  min-height: fit-content;
 }
 
 @media (min-width: 768px) {
   .landing-page .hero {
     padding: calc(64px + 80px) 0 80px;
-    min-height: 100vh;
+    min-height: fit-content;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
   }
 }
 

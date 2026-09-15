@@ -94,6 +94,7 @@
     "analytics": "数据分析",
     "scheduledTasks": "定时任务",
     "rules": "规则引擎",
+    "aiSuggestions": "AI 智能建议",
     "logout": "退出登录",
     "login": "登录",
     "register": "注册",

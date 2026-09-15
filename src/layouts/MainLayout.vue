@@ -65,13 +65,37 @@ onMounted(() => {
   cleanupWs = wsStore.start()
   document.addEventListener('mousemove', onMouseMove)
   document.addEventListener('mouseup', stopDrag)
+  window.addEventListener('resize', clampPanelWidths)
+  clampPanelWidths()
 })
+
+// 窗口变窄时按比例收缩面板，避免 900px 窗口下被 min-width 挤爆
+// 预算：侧栏 + 聊天面板 + 中间面板最小可用宽度(280) + 两条分隔条(12)
+const MIN_CENTER_WIDTH = 280
+const DIVIDER_TOTAL = 12
+
+function clampPanelWidths() {
+  const avail = window.innerWidth
+  const budget = avail - MIN_CENTER_WIDTH - DIVIDER_TOTAL
+  if (budget <= minSidebarWidth + minChatWidth) {
+    // 极端窄窗：两侧都压到各自最小，中间让位
+    sidebarWidth.value = minSidebarWidth
+    chatWidth.value = minChatWidth
+    return
+  }
+  const total = sidebarWidth.value + chatWidth.value
+  if (total <= budget) return // 当前宽度放得下，不动用户设定
+  const ratio = budget / total
+  sidebarWidth.value = Math.max(minSidebarWidth, Math.floor(sidebarWidth.value * ratio))
+  chatWidth.value = Math.max(minChatWidth, budget - sidebarWidth.value)
+}
 
 // 组件卸载时清理 WS 连接和监听器
 onUnmounted(() => {
   cleanupWs?.()
   document.removeEventListener('mousemove', onMouseMove)
   document.removeEventListener('mouseup', stopDrag)
+  window.removeEventListener('resize', clampPanelWidths)
 })
 
 // ========== 左侧栏双Tab ==========
@@ -94,6 +118,7 @@ const breadcrumbMap: Record<string, string> = {
   '/dashboard/scheduled-tasks': 'nav.scheduledTasks',
   '/dashboard/rules': 'nav.rules',
   '/dashboard/notifications': 'nav.notifications',
+  '/dashboard/ai-suggestions': 'nav.aiSuggestions',
 }
 const currentBreadcrumb = computed(() => t(breadcrumbMap[route.path] || 'nav.dashboard'))
 
@@ -138,6 +163,7 @@ const taskItems = ref([
 const managementItems = [
   { icon: '⏰', label: 'nav.scheduledTasks', path: '/dashboard/scheduled-tasks' },
   { icon: '⚡', label: 'nav.rules', path: '/dashboard/rules' },
+  { icon: '💡', label: 'nav.aiSuggestions', path: '/dashboard/ai-suggestions' },
   { icon: '🔔', label: 'nav.notifications', path: '/dashboard/notifications' },
   { icon: '🔐', label: 'settings.network', path: '/dashboard/settings?tab=network' },
   { icon: '👥', label: 'settings.team', path: '/dashboard/team' },
@@ -200,6 +226,12 @@ const managementItems = [
             :title="t('nav.notifications')"
             @click="handleMenuClick('/dashboard/notifications')"
           >🔔</button>
+          <button
+            class="icon-btn"
+            :class="{ active: activeMenu === '/dashboard/ai-suggestions' }"
+            :title="t('nav.aiSuggestions')"
+            @click="handleMenuClick('/dashboard/ai-suggestions')"
+          >💡</button>
           <button
             class="icon-btn"
             :class="{ active: activeMenu === '/dashboard/analytics' }"
@@ -336,7 +368,7 @@ const managementItems = [
 .layout {
   height: 100vh;
   overflow: hidden;
-  min-width: 860px;
+  /* 不设固定 min-width：900px 窗口下须按比例收缩，横向空间由 clampPanelWidths() 动态分配 */
 }
 
 /* ========== 左侧栏 (动态宽度) ========== */
@@ -347,7 +379,7 @@ const managementItems = [
   flex-direction: column;
   overflow: hidden;
   flex-shrink: 0;
-  min-width: 180px;
+  min-width: 0; /* 宽度由 JS 动态下发，窄窗可压至 180px 以下预算内 */
 }
 
 .sidebar-header {
@@ -564,7 +596,7 @@ const managementItems = [
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 300px;
+  min-width: 0; /* 允许收缩，配合 clampPanelWidths() 按比例让位 */
   background: var(--bg-page, #FAFAFA);
 }
 
@@ -656,7 +688,7 @@ const managementItems = [
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  min-width: 280px;
+  min-width: 0; /* 宽度由 JS 动态下发，窄窗可压缩 */
 }
 
 .sidebar-items:hover::-webkit-scrollbar-thumb,

@@ -94,6 +94,7 @@
     "analytics": "Analytics",
     "scheduledTasks": "Scheduled Tasks",
     "rules": "Rule Engine",
+    "aiSuggestions": "AI Suggestions",
     "logout": "Logout",
     "login": "Login",
     "register": "Register",

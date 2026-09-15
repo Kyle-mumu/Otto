@@ -81,6 +81,12 @@ const router = createRouter({
           component: () => import('@/views/NotificationsView.vue'),
         },
         {
+          // 第 2 条：AI 建议中心
+          path: 'ai-suggestions',
+          name: 'ai-suggestions',
+          component: () => import('@/views/AISuggestionsView.vue'),
+        },
+        {
           path: 'team',
           name: 'team',
           component: () => import('@/views/TeamView.vue'),

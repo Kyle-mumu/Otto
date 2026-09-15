@@ -237,7 +237,7 @@ export interface OCRSourceInfo {
   confidence?: number
 }
 
-/** OCR 导入响应 */
+/** OCR 导入响应（同步分支返回：OCR_IMPORT_ASYNC=false） */
 export interface OCRImportResponse {
   id: string
   title: string
@@ -248,6 +248,34 @@ export interface OCRImportResponse {
   source: OCRSourceInfo
   status: string
   created_at: string
+}
+
+// ========== OCR 异步作业（OCR_IMPORT_ASYNC=true）==========
+
+/** 作业状态机 */
+export type OcrJobStatus = 'pending' | 'running' | 'success' | 'failed'
+
+/** 作业真实进度分段（后端写入，前端轮询读取） */
+export type OcrJobStage = 'queued' | 'ocr' | 'structuring' | 'embedding' | 'done'
+
+/** 异步提交响应 */
+export interface OcrJobSubmitResponse {
+  job_id: string
+  status: OcrJobStatus
+  stage: OcrJobStage
+  created_at: string
+}
+
+/** 作业状态查询响应 */
+export interface OcrJobStatusResponse {
+  job_id: string
+  status: OcrJobStatus
+  stage: OcrJobStage
+  filename: string
+  experience_id?: string | null
+  error_message?: string | null
+  created_at: string
+  finished_at?: string | null
 }
 
 /** OCR 提供商状态 */
