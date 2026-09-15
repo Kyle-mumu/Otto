@@ -74,11 +74,25 @@
         </el-button>
       </div>
 
-      <!-- 进度条 -->
+      <!-- 真实进度（来自后端 stage，非模拟） -->
       <div v-if="isUploading" class="progress-wrap">
         <el-progress :percentage="progressPercent" :stroke-width="8" />
         <p class="progress-hint">{{ progressHint }}</p>
+        <p class="progress-sub">可以关闭本窗口，任务将在后台继续，完成后会提示你</p>
       </div>
+
+      <!-- 后台运行中（弹窗重开后仍显示） -->
+      <el-alert
+        v-if="!isUploading && activeJob"
+        type="info"
+        :closable="false"
+        show-icon
+        style="margin-top: 16px"
+      >
+        <template #title>
+          后台识别中：{{ activeJob.filename }} · {{ stageLabel(activeJob.stage) }}
+        </template>
+      </el-alert>
     </div>
 
     <!-- 步骤 2: 预览与编辑 -->
@@ -153,11 +167,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch as vueWatch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, reactive, computed, onUnmounted, watch as vueWatch } from 'vue'
+import { ElMessage, ElNotification } from 'element-plus'
 import { UploadFilled, Document } from '@element-plus/icons-vue'
-import { ocrImport } from '@/api/experiences'
-import type { OCRImportResponse } from '@/types/api'
+import { ocrImport, getOcrJob, getExperience } from '@/api/experiences'
+import type {
+  OCRImportResponse,
+  OcrJobStage,
+  OcrJobStatusResponse,
+} from '@/types/api'
+import { ocrJobTracker } from '@/composables/ocrJobTracker'
 
 const visible = defineModel<boolean>({ default: false })
 
@@ -173,6 +192,15 @@ const ocrResult = ref<OCRImportResponse | null>(null)
 const tagInput = ref('')
 const editTagInput = ref('')
 
+/**
+ * 当前作业（组件本地视图，与 tracker 同步）
+ * tracker 是模块级单例 —— 弹窗关闭后轮询仍在 tracker 中继续
+ */
+const currentJobId = ref<string | null>(null)
+const activeJob = computed(() =>
+  currentJobId.value ? ocrJobTracker.get(currentJobId.value) : null
+)
+
 const form = reactive({
   category: '',
   tags: [] as string[],
@@ -184,6 +212,26 @@ const editData = reactive({
   category: '',
   tags: [] as string[],
 })
+
+/** stage → 进度百分比映射（真实分段，替代原 setInterval 假进度） */
+const STAGE_PERCENT: Record<OcrJobStage, number> = {
+  queued: 10,
+  ocr: 40,
+  structuring: 70,
+  embedding: 90,
+  done: 100,
+}
+
+/** stage → 用户可读文案 */
+const STAGE_LABEL: Record<OcrJobStage, string> = {
+  queued: '排队中',
+  ocr: '正在识别文字...',
+  structuring: '正在结构化提取...',
+  embedding: '正在生成索引...',
+  done: '识别完成！',
+}
+
+const stageLabel = (stage: OcrJobStage) => STAGE_LABEL[stage] || '处理中...'
 
 const formatFileSize = (bytes: number): string => {
   if (bytes < 1024) return bytes + ' B'
@@ -245,50 +293,109 @@ const addEditTag = () => {
   editTagInput.value = ''
 }
 
+const emit = defineEmits<{
+  success: [result: OCRImportResponse | null]
+  /** 提交异步作业后抛出 job_id，供父视图显示「进行中」提示条 */
+  jobSubmitted: [jobId: string, filename: string]
+}>()
+
+/** 作业成功：拉回 draft 全文，进入预览编辑页 */
+const onJobSuccess = async (job: OcrJobStatusResponse) => {
+  isUploading.value = false
+  progressPercent.value = 100
+  progressHint.value = '识别完成！'
+
+  if (!job.experience_id) {
+    errorMessage.value = '识别成功但未返回经验 ID'
+    step.value = 'error'
+    return
+  }
+
+  try {
+    // 异步分支不返回全文，需按 experience_id 拉取 draft 详情
+    // http 拦截器不解包，返回 AxiosResponse，须取 .data
+    const res = await getExperience(job.experience_id)
+    const exp = res.data
+    ocrResult.value = {
+      id: exp.id,
+      title: exp.title,
+      summary: exp.summary,
+      content: exp.content,
+      tags: exp.tags || [],
+      category: (exp as any).category || '',
+      source: (exp as any).source || {
+        filename: job.filename,
+        file_type: '',
+        pages: 0,
+        ocr_provider: 'unknown',
+      },
+      status: exp.status || 'draft',
+      created_at: exp.created_at || new Date().toISOString(),
+    }
+    editData.title = ocrResult.value.title
+    editData.summary = ocrResult.value.summary
+    editData.category = ocrResult.value.category || ''
+    editData.tags = [...(ocrResult.value.tags || [])]
+    step.value = 'preview'
+    ElNotification({
+      title: 'OCR 识别完成',
+      message: `《${ocrResult.value.title}》已生成为草稿，可直接编辑发布`,
+      type: 'success',
+      duration: 5000,
+    })
+    emit('success', ocrResult.value)
+  } catch (err: any) {
+    errorMessage.value = err?.response?.data?.detail || '草稿加载失败'
+    step.value = 'error'
+  }
+}
+
+/**
+ * 提交-轮询：点上传即时返回 job_id，之后每 2s 轮询真实状态。
+ * 轮询交由模块级 tracker 执行 —— 弹窗关闭后仍在跑。
+ */
 const startOCR = async () => {
   if (!selectedFile.value) return
 
   isUploading.value = true
-  progressPercent.value = 0
+  progressPercent.value = STAGE_PERCENT.queued
   progressHint.value = '正在上传文件...'
+  errorMessage.value = ''
 
-  // 模拟进度
-  const progressTimer = setInterval(() => {
-    if (progressPercent.value < 90) {
-      progressPercent.value += Math.random() * 15
-      if (progressPercent.value > 50 && progressHint.value === '正在上传文件...') {
-        progressHint.value = '正在进行 OCR 识别...'
-      }
-      if (progressPercent.value > 80 && progressHint.value === '正在进行 OCR 识别...') {
-        progressHint.value = '正在结构化提取...'
-      }
-    }
-  }, 500)
-
+  const file = selectedFile.value
   try {
-    const result = await ocrImport(selectedFile.value, {
+    // http 拦截器不解包，返回 AxiosResponse，须取 .data
+    const submittedRes = await ocrImport(file, {
       category: form.category || undefined,
       tags: form.tags.length ? form.tags : undefined,
     })
+    const submitted = submittedRes.data
 
-    clearInterval(progressTimer)
-    progressPercent.value = 100
-    progressHint.value = '识别完成！'
+    currentJobId.value = submitted.job_id
+    // 交给 tracker：即使弹窗立即关闭，轮询也继续
+    ocrJobTracker.track(submitted.job_id, file.name, {
+      onUpdate: (job) => {
+        // 仅当本组件仍是该作业的展示方时更新进度条
+        if (currentJobId.value !== job.job_id) return
+        progressPercent.value = STAGE_PERCENT[job.stage] ?? 0
+        progressHint.value = stageLabel(job.stage)
+      },
+      onSuccess: (job) => {
+        if (currentJobId.value !== job.job_id) return
+        onJobSuccess(job)
+      },
+      onFailed: (job) => {
+        if (currentJobId.value !== job.job_id) return
+        isUploading.value = false
+        errorMessage.value = job.error_message || 'OCR 识别失败，请重试'
+        step.value = 'error'
+      },
+    })
 
-    ocrResult.value = result
-    editData.title = result.title
-    editData.summary = result.summary
-    editData.category = result.category || ''
-    editData.tags = [...(result.tags || [])]
-
-    setTimeout(() => {
-      step.value = 'preview'
-      isUploading.value = false
-    }, 300)
+    emit('jobSubmitted', submitted.job_id, file.name)
   } catch (err: any) {
-    clearInterval(progressTimer)
     isUploading.value = false
-    errorMessage.value = err?.response?.data?.detail || err?.message || 'OCR 识别失败，请重试'
+    errorMessage.value = err?.response?.data?.detail || err?.message || 'OCR 提交失败，请重试'
     step.value = 'error'
   }
 }
@@ -306,11 +413,7 @@ const publishNow = async () => {
   emit('success', ocrResult.value)
 }
 
-const emit = defineEmits<{
-  success: [result: OCRImportResponse | null]
-}>()
-
-// 重置状态
+// 重置状态（不清 tracker —— 后台作业需要继续跑）
 const reset = () => {
   step.value = 'upload'
   selectedFile.value = null
@@ -320,11 +423,26 @@ const reset = () => {
   form.category = ''
   form.tags = []
   tagInput.value = ''
+  // currentJobId 保留：重开弹窗时若作业仍在跑，应显示「后台识别中」
 }
 
-// 监听 dialog 关闭时重置
+// 监听 dialog 关闭时重置（tracker 中的轮询不受影响）
 vueWatch(visible, (val) => {
   if (!val) reset()
+})
+
+// 重开弹窗时：若该作业已成功且尚未消费，直接进预览
+vueWatch(visible, async (val) => {
+  if (!val || !currentJobId.value) return
+  const job = ocrJobTracker.get(currentJobId.value)
+  if (job?.status === 'success' && step.value === 'upload' && !ocrResult.value) {
+    await onJobSuccess(job)
+  }
+})
+
+onUnmounted(() => {
+  // 仅解除本组件的回调绑定，不停止 tracker 轮询
+  ocrJobTracker.detach(currentJobId.value)
 })
 </script>
 
@@ -430,6 +548,13 @@ vueWatch(visible, (val) => {
   font-size: 13px;
   color: var(--el-text-color-secondary);
   margin-top: 8px;
+}
+
+.progress-sub {
+  text-align: center;
+  font-size: 12px;
+  color: var(--el-text-color-placeholder);
+  margin-top: 4px;
 }
 
 .ocr-raw-text {
