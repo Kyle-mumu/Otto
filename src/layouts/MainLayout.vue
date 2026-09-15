@@ -159,20 +159,22 @@ const taskItems = ref([
   { id: 't6', title: '客户反馈汇总', meta: 'emp-a · content · 3小时前', status: 'common.cancelled', statusColor: 'var(--status-archived, #6B7280)' },
 ])
 
-// 管理页面快捷入口
-const managementItems = [
-  { icon: '⏰', label: 'nav.scheduledTasks', path: '/dashboard/scheduled-tasks' },
-  { icon: '⚡', label: 'nav.rules', path: '/dashboard/rules' },
-  { icon: '💡', label: 'nav.aiSuggestions', path: '/dashboard/ai-suggestions' },
-  { icon: '🔔', label: 'nav.notifications', path: '/dashboard/notifications' },
-  { icon: '🔐', label: 'settings.network', path: '/dashboard/settings?tab=network' },
-  { icon: '👥', label: 'settings.team', path: '/dashboard/team' },
-  { icon: '🤖', label: 'settings.models', path: '/dashboard/models' },
-  { icon: '📊', label: 'nav.quotas', path: '/dashboard/quotas' },
-  { icon: '📈', label: 'nav.analytics', path: '/dashboard/analytics' },
-  { icon: '📉', label: 'nav.usage', path: '/dashboard/usage' },
-  { icon: '📚', label: 'nav.experiences', path: '/dashboard/experiences' },
-]
+// 管理页面快捷入口（models 仅 admin 可见 —— 判据复用 auth.isAdmin）
+const managementItems = computed(() =>
+  [
+    { icon: '⏰', label: 'nav.scheduledTasks', path: '/dashboard/scheduled-tasks' },
+    { icon: '⚡', label: 'nav.rules', path: '/dashboard/rules' },
+    { icon: '💡', label: 'nav.aiSuggestions', path: '/dashboard/ai-suggestions' },
+    { icon: '🔔', label: 'nav.notifications', path: '/dashboard/notifications' },
+    { icon: '🔐', label: 'settings.network', path: '/dashboard/settings?tab=network' },
+    { icon: '👥', label: 'settings.team', path: '/dashboard/team' },
+    { icon: '🤖', label: 'settings.models', path: '/dashboard/models', adminOnly: true },
+    { icon: '📊', label: 'nav.quotas', path: '/dashboard/quotas' },
+    { icon: '📈', label: 'nav.analytics', path: '/dashboard/analytics' },
+    { icon: '📉', label: 'nav.usage', path: '/dashboard/usage' },
+    { icon: '📚', label: 'nav.experiences', path: '/dashboard/experiences' },
+  ].filter((item) => !item.adminOnly || auth.isAdmin),
+)
 </script>
 
 <template>

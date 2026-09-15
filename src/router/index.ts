@@ -49,6 +49,7 @@ const router = createRouter({
           path: 'models',
           name: 'models',
           component: () => import('@/views/ModelsView.vue'),
+          meta: { role: 'admin' },
         },
         {
           path: 'quotas',

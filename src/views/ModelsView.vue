@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getModels, createModel, updateModel, deleteModel, testModel } from '@/api/models'
+import { useAuthStore } from '@/stores/auth'
+
+// 权限判据复用自 stores/auth.ts（不新增权限函数/角色映射表）
+const auth = useAuthStore()
+const canManage = computed(() => auth.isAdmin)
 
 // 模型数据
 const models = ref<any[]>([])
@@ -126,13 +131,18 @@ async function handleDelete(model: any) {
   <div class="models-page">
     <header class="page-header">
       <h2>模型管理</h2>
-      <el-button type="primary" @click="openAdd">
+      <el-button v-if="canManage" type="primary" @click="openAdd">
         <el-icon><Plus /></el-icon>
         添加模型
       </el-button>
     </header>
 
-    <el-card shadow="never" class="content-card">
+    <!-- 非管理员：只读外壳，操作入口全部隐藏（不置灰） -->
+    <el-card v-if="!canManage" shadow="never" class="content-card">
+      <el-empty description="无权限访问" />
+    </el-card>
+
+    <el-card v-else shadow="never" class="content-card">
       <el-table :data="models" v-loading="loading" stripe>
         <el-table-column prop="name" label="模型名称" min-width="140" />
         <el-table-column prop="provider" label="提供商" width="110" />
