@@ -1,0 +1,123 @@
+name: Release Windows
+
+# 触发：仅推送 v* tag 时触发（不响应 push/PR，避免误触发）
+on:
+  push:
+    tags:
+      - 'v*'
+  # 允许手动触发以便调试（不推送 tag 不会自动跑；此处仅为可选救援入口）
+  workflow_dispatch:
+
+# 并发锁：同一 tag 不重复跑；cancel-in-progress 关，避免打断已开始的签名/发布
+concurrency:
+  group: release-windows-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-windows:
+    name: Build & Sign Windows installer
+    runs-on: windows-latest
+    # Environment 保护：仅 tag 触发 + 需要 release environment 审批
+    environment: release
+
+    permissions:
+      contents: write   # 用于把产物/更新清单回写（GitHub Release）
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install frontend deps
+        run: pnpm install --frozen-lockfile
+
+      # 注意：不要在此处单独跑 `pnpm build:tauri` 或 `pnpm build`。
+      # tauri.conf.json 的 beforeBuildCommand 已配置为 `pnpm run build:tauri`，
+      # `tauri build` 会自动调用它，重复执行会导致前端构建跑两遍。
+      - name: Build Tauri app (Windows)
+        shell: bash
+        env:
+          # 私钥与口令均来自 GitHub Secrets；私钥 base64 编码后存放，严禁入仓
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        # tauri build 会自动执行 beforeBuildCommand (pnpm run build:tauri)
+        run: pnpm tauri build
+
+      - name: Collect artifacts & signatures
+        id: collect
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== bundle tree ==="
+          find src-tauri/target/release/bundle -type f | sort || true
+
+          EXE=$(find src-tauri/target/release/bundle -type f -name '*.exe' | head -n 1)
+          if [ -z "${EXE}" ]; then
+            echo "::error::No .exe produced — aborting"
+            exit 1
+          fi
+          echo "exe=${EXE}" >> "$GITHUB_OUTPUT"
+
+          # .sig 为单行 base64：取全文（strip），不要按行切分
+          SIG_FILE="${EXE}.sig"
+          if [ ! -f "${SIG_FILE}" ]; then
+            echo "::error::Missing signature file: ${SIG_FILE}"
+            exit 1
+          fi
+          SIG=$(tr -d '\r\n' < "${SIG_FILE}")
+          echo "signature=${SIG}" >> "$GITHUB_OUTPUT"
+
+          echo "artifact_name=$(basename "${EXE}")" >> "$GITHUB_OUTPUT"
+          echo "Collected: ${EXE}"
+          echo "Signature length: ${#SIG}"
+
+      - name: Upload installer as release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.collect.outputs.exe }}
+          draft: true   # 先建草稿 Release，人工确认后再发布（原子性保护）
+
+      # latest.json 更新采用「生成独立条目 + 单独提交」的方式（方案 C）：
+      # 不在本 workflow 内直接改 ECS 上的 latest.json，避免并发写坏线上清单。
+      # 签名独立：windows-x86_64 条目 signature 不与 darwin 共用。
+      - name: Generate windows-x86_64 latest.json entry
+        shell: bash
+        env:
+          APP_VERSION: ${{ github.ref_name }}
+          SIGNATURE: ${{ steps.collect.outputs.signature }}
+          EXE_NAME: ${{ steps.collect.outputs.artifact_name }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist-meta
+          VER="${APP_VERSION#v}"
+          cat > dist-meta/windows-x86_64.json <<EOF
+          {
+            "signature": "${SIGNATURE}",
+            "url": "https://github.com/${{ github.repository }}/releases/download/${APP_VERSION}/${EXE_NAME}"
+          }
+          EOF
+          echo "--- generated entry ---"
+          cat dist-meta/windows-x86_64.json
+
+      - name: Upload metadata entry
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x86_64-entry
+          path: dist-meta/windows-x86_64.json
