@@ -110,7 +110,7 @@ jobs:
           cat > dist-meta/windows-x86_64.json <<EOF
           {
             "signature": "${SIGNATURE}",
-            "url": "https://github.com/${{ github.repository }}/releases/download/${APP_VERSION}/${EXE_NAME}"
+            "url": "http://121.43.110.135:8000/updates/${EXE_NAME}"
           }
           EOF
           echo "--- generated entry ---"
