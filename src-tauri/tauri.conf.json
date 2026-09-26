@@ -45,7 +45,7 @@
         "http://121.43.110.135:8000/updates/latest.json"
       ],
       "dangerousInsecureTransportProtocol": true,
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDEzRjgzMThGRDExNEQ2MTAKUldRUTFoVFJqekg0RTltL1VLTVBFYkdDZTk2aXVzNG85WDZWT3gzR0ZWVzZNSmlBQk1zSmdsbG0K"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEE4QzVCNkZDRkVFRjM2RjUKUldUMU51LysvTGJGcUE2YkRKdmE1VFBlbVFWbktHeDZjNjZJTkNBM0plV2RkU0ZwdFN5YnpQWkYK"
     }
   }
 }
