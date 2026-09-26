@@ -7,12 +7,15 @@ import { useWebSocketStore } from '@/stores/websocket'
 import NetworkStatusBadge from '@/components/NetworkStatusBadge.vue'
 import ChatPanel from '@/components/ChatPanel.vue'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
+import UpdateDialog from '@/components/UpdateDialog.vue'
+import { useUpdater } from '@/composables/useUpdater'
 
 const auth = useAuthStore()
 const wsStore = useWebSocketStore()
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
+const { checkForUpdate } = useUpdater()
 
 let cleanupWs: (() => void) | undefined
 
@@ -67,6 +70,8 @@ onMounted(() => {
   document.addEventListener('mouseup', stopDrag)
   window.addEventListener('resize', clampPanelWidths)
   clampPanelWidths()
+  // 启动时静默检查更新（非 Tauri 环境自动跳过）
+  setTimeout(() => checkForUpdate(), 2000)
 })
 
 // 窗口变窄时按比例收缩面板，避免 900px 窗口下被 min-width 挤爆
@@ -363,6 +368,9 @@ const managementItems = computed(() =>
     <div class="chat-wrapper" :style="{ width: chatWidth + 'px' }">
       <ChatPanel />
     </div>
+
+    <!-- 自动更新弹窗 -->
+    <UpdateDialog />
   </el-container>
 </template>
 

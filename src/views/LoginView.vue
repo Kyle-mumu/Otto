@@ -12,7 +12,7 @@ const auth = useAuthStore()
 const { t } = useI18n()
 
 // 版本号和 API 地址（用于调试）
-const appVersion = ref(import.meta.env.VITE_APP_VERSION || '0.1.11')
+const appVersion = ref(import.meta.env.VITE_APP_VERSION || '未知')
 const apiBaseURL = ref(__API_BASE_URL__)
 // 地址来源标记（platform-default:darwin:tauri 之类）属【内部构建信息】，
 // 仅供开发期排障；生产产物不向最终用户暴露（PM 裁决：非必要不加）。

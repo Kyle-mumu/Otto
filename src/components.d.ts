@@ -63,7 +63,9 @@ declare module 'vue' {
     OCRImportModal: typeof import('./components/OCRImportModal.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SystemUpdatePanel: typeof import('./components/SystemUpdatePanel.vue')['default']
     TraceTimelineTab: typeof import('./components/TraceTimelineTab.vue')['default']
+    UpdateDialog: typeof import('./components/UpdateDialog.vue')['default']
   }
   export interface GlobalDirectives {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

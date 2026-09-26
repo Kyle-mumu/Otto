@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
+import { chatCompletion, LLM_ERROR_TEXT } from '@/api/llm'
+import type { LlmChatMessage } from '@/api/llm'
+import { getModels } from '@/api/models'
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 
 // ========== 模式定义 ==========
 type ComposeMode = 'chat' | 'task'
@@ -38,6 +43,12 @@ function clearMessages() {
   showMoreMenu.value = false
 }
 
+// ========== Markdown 渲染 ==========
+const renderMarkdown = (content: string): string => {
+  const html = marked.parse(content, { breaks: true, gfm: true }) as string
+  return DOMPurify.sanitize(html)
+}
+
 function loadHistorySession(session: HistorySession) {
   // 模拟加载历史会话
   messages.value = [
@@ -64,7 +75,55 @@ function closePanels() {
 // ========== 表单数据 ==========
 const composeText = ref('')
 const selectedTeam = ref('default')
-const selectedModel = ref('Otto v1 High')
+// 批次 2：仅供展示的模型名缓存（选择器 v-model 已改绑 selectedModelId）；
+// 初值置空，避免在真实列表到位前闪现硬编假名。
+const selectedModel = ref('')
+// 批次 1：模型真 id 来源。后端 `/llm/chat` 必传 `model_id`（UUID），
+// 故挂载时拉一次 `/models` 取首行可用模型；拉不到则留空 → 后端返 `model_not_found`，前端显示错误态。
+const currentModelId = ref('')
+const modelOptions = ref<Array<{ id: string; name: string; provider?: string }>>([])
+// 批次 2：模型列表加载态 —— 区分「加载中 / 已就绪 / 不可用」，不再用假模型名占位
+const modelListState = ref<'loading' | 'ready' | 'unavailable'>('loading')
+// 批次 2：选择器以 id 为准（name 可重复，不能作 v-model 键）
+const selectedModelId = ref('')
+
+async function loadModelOptions() {
+  modelListState.value = 'loading'
+  try {
+    const { data } = await getModels({ page: 1, page_size: 50 })
+    const items = (data?.items ?? data?.data ?? []) as Array<{ id: string; name?: string; provider?: string; is_active?: boolean }>
+    modelOptions.value = items
+      .filter(m => m.is_active !== false)
+      .map(m => ({ id: m.id, name: m.name || m.id, provider: m.provider }))
+    if (modelOptions.value.length) {
+      selectedModelId.value = modelOptions.value[0].id
+      currentModelId.value = modelOptions.value[0].id
+      selectedModel.value = modelOptions.value[0].name
+      modelListState.value = 'ready'
+    } else {
+      // 后端无可用模型行：如实呈现「无可用模型」，不发假回复、不占位假名
+      modelListState.value = 'unavailable'
+      currentModelId.value = ''
+      selectedModel.value = ''
+    }
+  } catch {
+    // 拉取失败：同样落到不可用态，错误由发送时的错误态兜住
+    modelListState.value = 'unavailable'
+    currentModelId.value = ''
+  }
+}
+
+/** 批次 2：选择器改选 → 以 id 同步真 model_id 与展示名（后端按 id 查表） */
+function onModelChange() {
+  const hit = modelOptions.value.find(m => m.id === selectedModelId.value)
+  currentModelId.value = hit?.id || ''
+  selectedModel.value = hit?.name || ''
+}
+
+// 批次 2：发送闸门 —— 空消息 / 发送中 / 无可用模型，三者任一即禁用
+const canSend = computed(
+  () => !!composeText.value.trim() && !isTyping.value && modelListState.value === 'ready'
+)
 const selectedModeLevel = ref('standard')
 
 // ========== 上下文标签（仅任务模式显示） ==========
@@ -97,30 +156,60 @@ const messages = ref<ChatMessage[]>([
 // ========== Typing 指示器 ==========
 const isTyping = ref(false)
 
-// ========== 发送处理 ==========
-function handleSend() {
+// ========== 发送处理（批次 1：真调用后端代理，非流式）==========
+async function handleSend() {
   if (!composeText.value.trim()) return
+  if (isTyping.value) return // 批次 1：发送中拦截，防并发
   const now = new Date()
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+  const userText = composeText.value
   messages.value.push({
     type: 'user',
-    content: composeText.value,
+    content: userText,
     time: timeStr,
   })
   composeText.value = ''
 
-  // 模拟 Agent 回复 + Typing 指示器
+  // 真调用：组装上下文（取最近历史 + 本轮），映射为后端 LlmChatMessage 结构
   isTyping.value = true
-  setTimeout(() => {
-    isTyping.value = false
+  try {
+    const history: LlmChatMessage[] = messages.value
+      .slice(-9, -1) // 前 8 条历史（不含本条刚 push 的 user 消息由下方补）
+      .map(m => ({ role: m.type === 'user' ? 'user' : 'assistant', content: m.content }))
+    history.push({ role: 'user', content: userText })
+
+    const res = await chatCompletion({
+      model_id: currentModelId.value,
+      messages: history,
+    })
+
+    if (res.ok && res.content) {
+      messages.value.push({
+        type: 'agent',
+        content: res.content,
+        time: timeStr,
+        sender: 'Otto',
+      })
+    } else {
+      // 错误态：不重试，直接以气泡呈现（方案第 3 节 error_code 分层）
+      const tip = LLM_ERROR_TEXT[res.error_code || ''] || res.content || '请求失败'
+      messages.value.push({
+        type: 'agent',
+        content: `⚠️ ${tip}`,
+        time: timeStr,
+        sender: 'Otto',
+      })
+    }
+  } catch (e: any) {
     messages.value.push({
       type: 'agent',
-      content: '收到你的消息！这是演示回复，V1.1 将接入真实 LLM API。',
+      content: `⚠️ 请求异常：${e?.message || '未知错误'}`,
       time: timeStr,
       sender: 'Otto',
     })
-  }, 1500)
-  // TODO: V1.1 接入后端 LLM API + WebSocket
+  } finally {
+    isTyping.value = false
+  }
 }
 
 // ========== 键盘事件：Enter 发送，Shift+Enter 换行 ==========
@@ -135,6 +224,11 @@ function handleKeydown(e: KeyboardEvent) {
 function switchMode(m: ComposeMode) {
   mode.value = m
 }
+
+// ========== 挂载：拉取可用模型（批次 1 真调用前置） ==========
+onMounted(() => {
+  loadModelOptions()
+})
 </script>
 
 <template>
@@ -229,7 +323,7 @@ function switchMode(m: ComposeMode) {
         <template v-if="msg.type === 'agent'">
           <div class="msg-avatar">A</div>
           <div class="msg-content-wrap">
-            <div class="msg-bubble">{{ msg.content }}</div>
+            <div class="msg-bubble markdown-body" v-html="renderMarkdown(msg.content)"></div>
             <div class="msg-meta">
               <span class="sender">{{ msg.sender }}</span>
               <span class="time">{{ msg.time }}</span>
@@ -238,7 +332,7 @@ function switchMode(m: ComposeMode) {
         </template>
         <!-- User 消息 -->
         <template v-else>
-          <div class="msg-bubble">{{ msg.content }}</div>
+          <div class="msg-bubble markdown-body" v-html="renderMarkdown(msg.content)"></div>
           <div class="msg-meta">
             <span class="time">{{ msg.time }}</span>
           </div>
@@ -264,7 +358,8 @@ function switchMode(m: ComposeMode) {
         <textarea
           v-model="composeText"
           class="chat-textarea"
-          :placeholder="placeholder"
+          :placeholder="isTyping ? 'Otto 正在回复…' : placeholder"
+          :disabled="isTyping"
           @keydown="handleKeydown"
         ></textarea>
         <div class="chat-toolbar">
@@ -283,23 +378,31 @@ function switchMode(m: ComposeMode) {
           </div>
           <!-- Right: Model + Send -->
           <div class="toolbar-right">
-            <div class="model-chip" title="模型选择">
-              <span class="model-dot"></span>
-              <select v-model="selectedModel" class="model-select">
-                <option value="Otto v1 High">Otto v1 High</option>
-                <option value="Otto v1 Standard">Otto v1 Standard</option>
-                <option value="GPT-4o">GPT-4o</option>
-                <option value="Claude 3.5 Sonnet">Claude 3.5 Sonnet</option>
-                <option value="DeepSeek-V3">DeepSeek-V3</option>
+            <div class="model-chip" :title="modelListState === 'unavailable' ? '暂无可用模型' : '模型选择'">
+              <span class="model-dot" :class="{ off: modelListState !== 'ready' }"></span>
+              <select
+                v-if="modelListState === 'ready'"
+                v-model="selectedModelId"
+                class="model-select"
+                :disabled="isTyping"
+                @change="onModelChange"
+              >
+                <option v-for="m in modelOptions" :key="m.id" :value="m.id">
+                  {{ m.name }}{{ m.provider ? ` · ${m.provider}` : '' }}
+                </option>
               </select>
-              <span class="arrow">▾</span>
+              <!-- 批次 2：加载中 / 不可用 —— 不再回退硬编的 5 个假模型名 -->
+              <span v-else class="model-empty">
+                {{ modelListState === 'loading' ? '加载中…' : '无可用模型' }}
+              </span>
+              <span v-if="modelListState === 'ready'" class="arrow">▾</span>
             </div>
             <button
               class="chat-send-btn"
-              title="发送"
-              :disabled="!composeText.trim()"
+              :title="isTyping ? '发送中…' : '发送'"
+              :disabled="!canSend"
               @click="handleSend"
-            >↑</button>
+            >{{ isTyping ? '⋯' : '↑' }}</button>
           </div>
         </div>
       </div>
@@ -853,6 +956,26 @@ function switchMode(m: ComposeMode) {
   flex-shrink: 0;
 }
 
+/* 批次 2：无可用模型 / 加载中 —— 灰点 + 占位文案（不再显示假模型名） */
+.model-chip .model-dot.off {
+  background: var(--text-muted, #888);
+}
+
+.model-chip .model-empty {
+  font-size: 11px;
+  color: var(--text-muted, #888);
+  font-family: var(--font-primary);
+  white-space: nowrap;
+  max-width: 96px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.model-chip .model-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .model-chip .arrow {
   font-size: 8px;
   color: var(--text-muted, #888);
@@ -977,5 +1100,54 @@ function switchMode(m: ComposeMode) {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Markdown 渲染样式 */
+.markdown-body {
+  line-height: 1.6;
+  word-break: break-word;
+}
+.markdown-body p { margin: 0 0 8px; }
+.markdown-body p:last-child { margin-bottom: 0; }
+.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 {
+  margin: 12px 0 6px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.markdown-body h1 { font-size: 1.3em; }
+.markdown-body h2 { font-size: 1.2em; }
+.markdown-body h3 { font-size: 1.1em; }
+.markdown-body h4 { font-size: 1em; }
+.markdown-body ul, .markdown-body ol {
+  margin: 6px 0;
+  padding-left: 1.5em;
+}
+.markdown-body li { margin: 2px 0; }
+.markdown-body code {
+  background: rgba(0, 0, 0, 0.08);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-family: 'SF Mono', 'Monaco', monospace;
+}
+.markdown-body pre {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 10px 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+.markdown-body pre code { background: none; padding: 0; }
+.markdown-body blockquote {
+  border-left: 3px solid rgba(0, 0, 0, 0.15);
+  padding-left: 10px;
+  margin: 8px 0;
+  opacity: 0.8;
+}
+.markdown-body strong { font-weight: 600; }
+.markdown-body table { border-collapse: collapse; margin: 8px 0; }
+.markdown-body th, .markdown-body td {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  padding: 4px 8px;
 }
 </style>

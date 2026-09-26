@@ -14,6 +14,7 @@ import {
   type WebhookTriggerEvent,
 } from '@/api/webhook'
 import SettingsNetworkView from './SettingsNetworkView.vue'
+import SystemUpdatePanel from '@/components/SystemUpdatePanel.vue'
 import ImBotPanel from '@/components/im/ImBotPanel.vue'
 import ImBindingPanel from '@/components/im/ImBindingPanel.vue'
 
@@ -233,6 +234,12 @@ async function loadAuditLogs() {
         <el-tab-pane label="网络管理" name="network">
           <div class="tab-content">
             <SettingsNetworkView />
+          </div>
+        </el-tab-pane>
+
+        <el-tab-pane label="系统更新" name="system-update">
+          <div class="tab-content">
+            <SystemUpdatePanel />
           </div>
         </el-tab-pane>
       </el-tabs>

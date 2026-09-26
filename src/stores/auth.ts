@@ -11,6 +11,9 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isLoggedIn = computed(() => !!getToken() && !!user.value)
   const isAdmin = computed(() => user.value?.role === 'admin')
+  // 第三角色值：只读（OQ-1 / OQ-4，见 OPEN-03 业务向 OQ 汇总稿）。
+  // 当前不被任何 meta.role 引用 —— viewer 的写拦截由后端 RBAC（require_member/require_admin）兜底。
+  const isViewer = computed(() => user.value?.role === 'viewer')
 
   async function login(data: LoginRequest) {
     loading.value = true
@@ -62,5 +65,5 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  return { user, loading, isLoggedIn, isAdmin, login, register, fetchUser, logout, init }
+  return { user, loading, isLoggedIn, isAdmin, isViewer, login, register, fetchUser, logout, init }
 })

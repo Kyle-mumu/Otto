@@ -29,3 +29,8 @@ src-tauri/target/
 
 # OS files
 Thumbs.db
+
+# 备份件与本地更新产物（不入库）
+*.bak-*
+updates/
+manifest-latest.json

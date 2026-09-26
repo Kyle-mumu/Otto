@@ -120,7 +120,7 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const isAuth = !!getToken()
 
   if (to.meta.requiresAuth && !isAuth) {
@@ -130,6 +130,29 @@ router.beforeEach((to) => {
   // 已登录用户访问 guest 页面（landing/login/register）→ 跳转 dashboard
   if (to.meta.guest && isAuth && to.name !== 'landing') {
     return { name: 'dashboard' }
+  }
+
+  // 角色门：把 MainLayout.vue 的菜单隐藏门（唯一已生效的 admin 门）复制到路由层，
+  // 否则直接输入 /dashboard/models 这类直链可以绕过菜单门进入 admin-only 页面。
+  const requiredRole = to.meta.role
+  if (isAuth && requiredRole) {
+    // auth.user 是异步态（仅由 fetchUser() 填充，init() 无调用点），
+    // 刷新后直进受保护路由时 store 里还没有用户信息 —— 此处须等一次，否则会误踢真 admin。
+    const { useAuthStore } = await import('@/stores/auth')
+    const auth = useAuthStore()
+    if (!auth.user && !auth.loading) {
+      try {
+        await auth.fetchUser()
+      } catch {
+        // 兜底语义收敛：不得静默通过。fetchUser 失败（401 / 网络错）时
+        // 会话已不可用，显式跳登录页由用户重新认证（不默认放行、不默认跳 dashboard）。
+        return { name: 'login' }
+      }
+    }
+    // fetchUser 成功但角色不满足（或用户信息仍缺失）→ 一律不通过
+    if (auth.user?.role !== requiredRole) {
+      return { name: 'dashboard' }
+    }
   }
 })
 
