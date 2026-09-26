@@ -64,7 +64,7 @@ export const useWebSocketStore = defineStore('websocket', () => {
     ws = new WebSocket(url)
 
     ws.onopen = () => {
-      console.log('[WS Store] Connected, sending auth...')
+      console.debug('[WS Store] Connected, sending auth...')
       // C-05: 连接建立后发送认证消息（非 URL 传递）
       sendAuth(token)
     }
@@ -83,7 +83,7 @@ export const useWebSocketStore = defineStore('websocket', () => {
           authenticated = true
           connected.value = true
           reconnectAttempt = 0  // 成功连接，重置重连计数
-          console.log('[WS Store] Authenticated')
+          console.debug('[WS Store] Authenticated')
           return
         }
 
@@ -116,7 +116,7 @@ export const useWebSocketStore = defineStore('websocket', () => {
       connected.value = false
       authenticated = false
       ws = null
-      console.log('[WS Store] Disconnected (code:', ev.code, '), reconnecting...')
+      console.debug('[WS Store] Disconnected (code:', ev.code, '), reconnecting...')
       // 仅非主动断开时重连
       if (ev.code !== 4001 && ev.code !== 4003) {
         scheduleReconnect()
@@ -134,7 +134,7 @@ export const useWebSocketStore = defineStore('websocket', () => {
     // 指数退避：1s → 2s → 4s → 8s → ... → 60s
     const delay = Math.min(INITIAL_RECONNECT_DELAY * Math.pow(2, reconnectAttempt), MAX_RECONNECT_DELAY)
     reconnectAttempt++
-    console.log(`[WS Store] Reconnecting in ${delay}ms (attempt ${reconnectAttempt})...`)
+    console.debug(`[WS Store] Reconnecting in ${delay}ms (attempt ${reconnectAttempt})...`)
     reconnectTimer = setTimeout(connect, delay)
   }
 

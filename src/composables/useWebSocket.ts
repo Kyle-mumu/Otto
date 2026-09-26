@@ -45,7 +45,7 @@ export function useWebSocket(path: string = '/ws') {
     ws = new WebSocket(url)
 
     ws.onopen = () => {
-      console.log('[WS] Connected, sending auth...')
+      console.debug('[WS] Connected, sending auth...')
       sendAuth(token)
     }
 
@@ -62,7 +62,7 @@ export function useWebSocket(path: string = '/ws') {
         if (data.type === 'connection_established') {
           authenticated = true
           connected.value = true
-          console.log('[WS] Authenticated')
+          console.debug('[WS] Authenticated')
           return
         }
 
@@ -83,7 +83,7 @@ export function useWebSocket(path: string = '/ws') {
       connected.value = false
       authenticated = false
       ws = null
-      console.log('[WS] Disconnected, reconnecting...')
+      console.debug('[WS] Disconnected, reconnecting...')
       if (ev.code !== 4001 && ev.code !== 4003) {
         scheduleReconnect()
       }
