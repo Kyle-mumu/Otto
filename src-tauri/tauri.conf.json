@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/nicedoc/tauri/dev/.schema/config.schema.json",
   "productName": "Otto",
-  "version": "0.1.24",
+  "version": "0.2.1",
   "identifier": "com.otto.ai",
   "build": {
     "beforeBuildCommand": "pnpm run build:tauri",
@@ -29,6 +29,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -36,5 +37,15 @@
       "icons/icon.icns",
       "icons/icon_otto_bold_o.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "http://121.43.110.135:8000/updates/latest.json"
+      ],
+      "dangerousInsecureTransportProtocol": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDEzRjgzMThGRDExNEQ2MTAKUldRUTFoVFJqekg0RTltL1VLTVBFYkdDZTk2aXVzNG85WDZWT3gzR0ZWVzZNSmlBQk1zSmdsbG0K"
+    }
   }
 }

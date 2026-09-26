@@ -1,6 +1,6 @@
 [package]
 name = "otto-ai"
-version = "0.1.24"
+version = "0.2.1"
 description = "Otto AI协作系统 - 桌面端"
 authors = ["Kyle"]
 edition = "2021"
@@ -11,6 +11,8 @@ tauri-build = { version = "2.0.0", features = [] }
 
 [dependencies]
 tauri = { version = "2.0.0", features = [] }
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
