@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import http from '@/api/http'
 import {
@@ -18,7 +19,22 @@ import SystemUpdatePanel from '@/components/SystemUpdatePanel.vue'
 import ImBotPanel from '@/components/im/ImBotPanel.vue'
 import ImBindingPanel from '@/components/im/ImBindingPanel.vue'
 
-const activeTab = ref('knowledge')
+const route = useRoute()
+
+// 设置页签合法名白名单（与下方 el-tab-pane 的 name 一致）
+const SETTINGS_TABS = ['knowledge', 'webhook', 'im-bot', 'im-bind', 'audit', 'network', 'system-update']
+
+// 依据路由 query.tab 激活页签；无 query / 非法值回落 knowledge（保持既有行为）
+function resolveActiveTab(): string {
+  const tab = typeof route.query.tab === 'string' ? route.query.tab : ''
+  return SETTINGS_TABS.includes(tab) ? tab : 'knowledge'
+}
+
+const activeTab = ref(resolveActiveTab())
+
+watch(() => route.query.tab, () => {
+  activeTab.value = resolveActiveTab()
+})
 
 // ========== 知识库配置 ==========
 const kbConfig = ref({
