@@ -21,9 +21,9 @@ import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 //   3. 相对路径 /api/v1（浏览器：走 Vite proxy 或同源）
 // ============================================================
 const PLATFORM_DEFAULTS: Record<string, { api: string; ws: string }> = {
-  // Mac 桌面端：本机 SSH 隧道 / 本地转发 → ECS API
-  // 必须用 127.0.0.1，不能用 localhost（WKWebView 会优先解析 IPv6 ::1 而连接失败）
-  darwin: { api: 'http://127.0.0.1:8080/api/v1', ws: 'ws://127.0.0.1:8080/api/v1' },
+  // Mac 桌面端：直连 ECS 公网地址（演示环境；如需本机隧道，用 OTTO_DARWIN_API 覆盖）
+  // 禁用 localhost，须写 IP 或域名（WKWebView 会优先解析 IPv6 ::1 而连接失败）
+  darwin: { api: 'http://121.43.110.135:8000/api/v1', ws: 'ws://121.43.110.135:8000/api/v1' },
   // Windows 桌面端：直连阿里云 ECS 公网 IP（演示环境，无需隧道）
   win32: { api: 'http://121.43.110.135:8000/api/v1', ws: 'ws://121.43.110.135:8000/api/v1' },
 }
